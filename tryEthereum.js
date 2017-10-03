@@ -6,8 +6,7 @@ var account1 = "0x42a0193dc3685a83d0c38d129fedb72b7d9262b0";
 var account2 = "0xf81d26ae334e416d09828312794a3c2f0a81b02a";
 var messageOut = "userID;packetID;locationID;packetStatus;timestamp"
 
-//web3.personal.unlockAccount(account1, "e1601515", 10000);
-//not working
+
 
 //web3.eth.sendTransaction({from: account1, to: account2, data: web3.toHex(messageOut), gas: 200000})
 
