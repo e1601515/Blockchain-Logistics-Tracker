@@ -14,11 +14,14 @@ web3.setProvider(new web3.providers.HttpProvider("http://localhost:8545"));
 
 //this is the command for geth CLI to start the rpc, unless done with parameters when starting geth
 //admin.startRPC("127.0.0.1", 8545, "*", "web3,net,eth")
+//correct parameters in this case would be
+//geth --testnet --fast --rpc --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "http://localhost:8545" --rpcapi "web3,net,eth"
+
 
 //initializing and starting web server
 var app = express();
 var port = 8080;
-app.set('view engine', 'ejs')
+app.set('view engine', 'ejs');
 app.listen(port, function() {
  console.log('app started');
 });
@@ -28,22 +31,33 @@ var mainAccount = "0xf81D26ae334E416d09828312794A3c2F0A81B02A";
 var secondaryAccount = "0x42a0193dc3685a83d0c38d129fedb72b7d9262b0";
 //NEVER STORE THE PRIVATE KEY IN PUBLISHED SOURCE CODE!!!!
 var privateKey = "";
+var dataToEncrypt="'packetID':'"+packetIdFromClient+"';'deliveryStatus':'sent';'userID':'<userID here>';'locationName':'<locationName here>';'gpsLongitude':'<gps here>';'gpslatitude':'<gps here>';'locationByGPS':'<address/town here>'"
 var txutils = lightwallet.txutils;
-var txHash,packetIdFromClient,messageOut;
-const cipher = crypto.createCipher('aes192', 'logistiikka');
+var txHash="";
+var packetIdFromClient,messageOut;
 let encrypted;
+var cipher;
 //as we dont have viewing functionality yet, we dont need decipherer right now
 //const decipher = crypto.createDecipher('aes192', 'logistiikka');
 
 //database file premade by SQL lite browser application
 //at this stage should consist of 1 table with 4 columns, which are
 //1.packetID , 2.Sent , 3.Forwarded , 4.Delivered(or Received)
-//SHOULD NOT BE IN PUBLICLY ACCESSED FOLDER so it cant be accessed by 3rd parties
+//3rd parties gaining access is not so much of an issue as db doesnt include unencrypted data as long as it cant be modified to input false txhash
 var dbFilePath = "transactionTrackingDB.db"
 
 //rendering html from ejs template and sending to client
 app.get('/', function (req, res) {
   res.render('index');
+})
+app.get('/getTx', function (req, res) {
+  if(txHash!="")
+  {
+  res.send('Latest tx https://ropsten.etherscan.io/tx/'+txHash);
+  }
+  else {
+    res.send('No tx yet during current session.');
+  }
 })
 
 //initializing body parser so we can fetch data from text box
@@ -69,13 +83,14 @@ app.post('/sendpacketid', function (req, res) {
 })
 
 //method to save the transaction to database
-function dbSave()
+function saveToDB()
 {
   var notFound=true;
   var txdb = new sqlite3.Database(dbFilePath);
   txdb.serialize(function() {
-    //assuming that packetID are unique per transfer, as I imagine they should be, it is in order to check whether a record already exists in database
-    //txdb.get("SELECT * FROM TXHASH WHERE packetID='"+packetIdFromClient+"'", function(err, row) {
+
+    //DISABLING THIS CHECK BECAUSE THE DB STRUCTURE WAS MODIFIED TO SAVE LIMITLESS TXHASH
+    /*
     txdb.get("IF EXISTS (SELECT * FROM TXHASH WHERE packetID='"+packetIdFromClient+"') THEN SELECT * FROM TXHASH WHERE packetID='"+packetIdFromClient+"' END IF", function(err, row) {
       if(row!= null)
       {
@@ -86,11 +101,10 @@ function dbSave()
         notFound = true;
       }
     });
-    if(notFound)
-    {
-      //frontend doesnt yet tell which action the transaction represents (status of package delivery that we are logging) so ill just use 'sent' for proof of concept
-      txdb.run("INSERT INTO TXHASH(packetID,sent,forwarded,received) VALUES('"+packetIdFromClient+"','"+txHash+"','','')");
-    }
+    */
+
+    //frontend doesnt yet tell which action the transaction represents (status of package delivery that we are logging) so ill just use 'sent' for proof of concept
+    txdb.run("INSERT INTO TX(packetID,transactionID) VALUES('"+packetIdFromClient+"','"+txHash+"')");
     txdb.close();
   });
 }
@@ -110,6 +124,7 @@ function saveTransaction()
   value: web3.toHex(0),
   //this methdod fetches the integer that represents the count of transactions.
   //if we knew this already, we could create transactions without our Ethereum node being fully synced.
+  //it is a little silly to turn it into hex twice, but its inconvenient to parse the 0x from the start while web3 functions do it for us
   nonce: web3.toHex(web3.eth.getTransactionCount(mainAccount)),
   //values seem huge because theyre in Wei, which is the smallest subunit of Ether
   gasLimit: web3.toHex(800000),
@@ -119,7 +134,6 @@ function saveTransaction()
   //hardcoded "sent" as its the selected operation for demo... so now we have packet ID and packet status along with timestamp from Ethereum itself.
   data: web3.toHex(encrypted)
   };
-
   var transaction = new tx(rawTx);
   transaction.sign(hexPrivateKey);
   var serializedTx = transaction.serialize().toString('hex');
@@ -130,14 +144,15 @@ function saveTransaction()
       } else {
         console.log("No error. Transaction made with identifier: "+result);
         txHash=result;
-        dbSave();
+        saveToDB();
       }
   });
 }
 
+//method that turns string into encrypted hex
 function encryptOutput()
 {
-  var dataToEncrypt="packetID:"+packetIdFromClient+";packetStatus:sent;userID:<userID here>;locationName:<locationName here>;gpslongitude:<gps here>;gpslatitude:<gps here>;locationByGPS:<address/town here>"
+  cipher = crypto.createCipher('aes192', 'logistiikka');
   console.log("Data to encrypt:  "+dataToEncrypt);
   encrypted = cipher.update(dataToEncrypt, 'utf8', 'hex');
   encrypted += cipher.final('hex');
