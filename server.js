@@ -7,6 +7,8 @@ const crypto = require('crypto');
 var express = require('express');
 var bodyParser = require('body-parser')
 var sqlite3 = require('sqlite3').verbose();
+//adding external .js file
+var txFromEthereum = require('./project_modules/getFromEthereum.js');
 
 //initializing connection to local ethereum node
 var web3 = new Web3();
@@ -15,7 +17,7 @@ web3.setProvider(new web3.providers.HttpProvider("http://localhost:8545"));
 //this is the command for geth CLI to start the rpc, unless done with parameters when starting geth
 //admin.startRPC("127.0.0.1", 8545, "*", "web3,net,eth")
 //correct parameters in this case would be
-//geth --testnet --fast --rpc --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "http://localhost:8545" --rpcapi "web3,net,eth"
+//geth --testnet --fast --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "http://localhost:8545" --rpcapi "web3,net,eth"
 
 
 //initializing and starting web server
@@ -31,7 +33,7 @@ var mainAccount = "0xf81D26ae334E416d09828312794A3c2F0A81B02A";
 var secondaryAccount = "0x42a0193dc3685a83d0c38d129fedb72b7d9262b0";
 //NEVER STORE THE PRIVATE KEY IN PUBLISHED SOURCE CODE!!!!
 var privateKey = "";
-var dataToEncrypt="'packetID':'"+packetIdFromClient+"';'deliveryStatus':'sent';'userID':'<userID here>';'locationName':'<locationName here>';'gpsLongitude':'<gps here>';'gpslatitude':'<gps here>';'locationByGPS':'<address/town here>'"
+var dataToEncrypt="'packetID':'"+packetIdFromClient+"';'deliveryStatus':'sent';'userID':'userID here';'locationName':'locationName here';'gpsLongitude':'gps here';'gpslatitude':'gps here';'locationByGPS':'address/town here'"
 var txutils = lightwallet.txutils;
 var txHash="";
 var packetIdFromClient,messageOut;
@@ -44,7 +46,7 @@ var cipher;
 //at this stage should consist of 1 table with 4 columns, which are
 //1.packetID , 2.Sent , 3.Forwarded , 4.Delivered(or Received)
 //3rd parties gaining access is not so much of an issue as db doesnt include unencrypted data as long as it cant be modified to input false txhash
-var dbFilePath = "transactionTrackingDB.db"
+var dbFilePath = "./database/transactionTrackingDB.db"
 
 //rendering html from ejs template and sending to client
 app.get('/', function (req, res) {
@@ -56,6 +58,16 @@ app.get('/getTx', function (req, res) {
   res.send('Latest tx https://ropsten.etherscan.io/tx/'+txHash);
   }
   else {
+    res.send('No tx yet during current session.');
+  }
+})
+app.get('/getFromEthereum', function (req, res) {
+  if(txHash!="")
+  {
+    res.send("Packet info fetched from Ethereum: " + txFromEthereum.getFromEthereumFunction(txHash));
+  }
+  else
+  {
     res.send('No tx yet during current session.');
   }
 })
@@ -79,13 +91,13 @@ app.post('/sendpacketid', function (req, res) {
   //in final version we could return to same page for adding more or viewing data,
   //res.render('index');
   //but for prototype1 proof of concept we will just display the return value of saveTransaction, which is the hash identifier of the created transaction
-  res.send("Transaction made! Check database for changes. /getTx for hash.");
+  res.send("Transaction made! Check database for changes. /getTx for hash. /getFromEthereum to get packet info from Ethereum");
 })
 
 //method to save the transaction to database
 function saveToDB()
 {
-  var notFound=true;
+  //var notFound=true;
   var txdb = new sqlite3.Database(dbFilePath);
   txdb.serialize(function() {
 
@@ -118,7 +130,7 @@ function saveTransaction()
 
   //this is the structure where parameters are defined
   var rawTx = {
-  //unlike with web.eth.sendTransaction the raw transaction takes parameters in hex
+  //unlike with web3.eth.sendTransaction the raw transaction takes parameters in hex
   from: mainAccount,
   to: secondaryAccount,
   value: web3.toHex(0),
