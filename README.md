@@ -5,7 +5,7 @@ The idea is to create a package tracker for internal logistics that stores and r
 
 INSTRUCTIONS
 
-by synchronized local node :
+by synchronized local node : \n <br>
 geth --testnet --fast --rpc --rpc --rpcaddr "127.0.0.1" --rpcport 8545 --rpccorsdomain "http://localhost:8545" --rpcapi "web3,net,eth"
 
 or use infura.io by changing in server.js (requires free registration) :
