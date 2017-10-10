@@ -15,7 +15,7 @@ app.listen(port, function() {
 var mainAccount = "0xf81D26ae334E416d09828312794A3c2F0A81B02A";
 var secondaryAccount = "0x42a0193dc3685a83d0c38d129fedb72b7d9262b0";
 //NEVER STORE THE PRIVATE KEY IN PUBLISHED SOURCE CODE!!!!
-var privateKey = "5c75f5e459dddcc93fcee81f79ec718c1e9c3a376a86a08df4817b2f9c745fed";
+var privateKey = "";
 //crypting password
 var password = "logistiikka";
 txHash="";
