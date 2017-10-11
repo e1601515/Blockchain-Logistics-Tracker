@@ -16,3 +16,6 @@ web3.setProvider(new web3.providers.HttpProvider("https://ropsten.infura.io/<you
 you have to add your own accounts private key to server.js , you can get that from myetherwallet.com
 
 then just run server.js and connect localhost by browser
+
+System requirements:
+Fast syncing a testnet node takes currently <10GB of HDD/SSD space. (thanks to the very recent Metropolis update on Ropsten testnet)
