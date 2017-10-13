@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!-- saved from url=(0062)https://www.cc.puv.fi/~e1401168/ekasivu/barcode2/barcode2.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<!-- <link rel="stylesheet" type="text/css" href="cssreset.css" > monissa selaimissa omat stylit tää laittaa ne nollaksi.-->
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<style>
+#title{
+  font-size:100px;
+}
+input{
+position:absolute;
+   top: 200px;
+height:150px;
+width:340px;
+font-size:60px;
+    -moz-appearance:none; /* Firefox */
+    -webkit-appearance:none; /* Safari and Chrome */  <!--inputti näkyy puhelimella pyöreänä iphonen safaris ja chromes ilman tätä.-->
+	 appearance:none;
+}
+button{
+font-size:60px;
+position:absolute;
+  left: 350px;
+  top: 200px;
+  margin: 0px;
+height:150px;
+width:150px;
+background-color: #EEE;
+padding: 0px;
+}
+</style>
+</head>
+<body>
+
+<div id="title">
+<p>Packet ID </p>
+</div>
+<form action="/sendpacketid" method="post">
+<input name="packetID" type="search">
+<input name="companyName" type="hidden" value="VR">
+<button type="submit">Send</button>
+</form>
+<script>
+alert("Transaction made! Check database for changes.\n/getTx for hash.\n/getFromEthereum to get packet info from Ethereum");
+</script>
+</body></html>

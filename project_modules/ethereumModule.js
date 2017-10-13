@@ -4,10 +4,9 @@ var tx = require('ethereumjs-tx');
 var lightwallet = require('eth-lightwallet');
 var databaseModule = require('./databaseModule.js');
 var txHash;
-var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient)
+var web3 = new Web3();
+var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient,companyNameFromClient)
 {
-  var web3 = new Web3();
-  web3.setProvider(new web3.providers.HttpProvider("http://localhost:8545"));
   var txutils = lightwallet.txutils;
   var hexPrivateKey = new Buffer(privateKey, 'hex');
   var rawTx = {
@@ -37,8 +36,6 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
 }
 var getFromEthereumFunction = function(searchTerm)
 {
-  var web3 = new Web3();
-  web3.setProvider(new web3.providers.HttpProvider("http://localhost:8545"));
   console.log("search "+searchTerm);
   var transactionFromEthereum = web3.toAscii(web3.eth.getTransaction(searchTerm).input);
   console.log("ascii "+transactionFromEthereum);
@@ -48,8 +45,29 @@ var getLatest = function()
 {
   return txHash;
 }
-
-
+function connectEthereum()
+{
+  web3.setProvider(new web3.providers.HttpProvider("http://localhost:8545"));
+  if(web3.isConnected())
+  {
+    console.log("Using local node.")
+  }
+  else
+  {
+    console.log("Can't connect to local node. Trying remote node.")
+    web3.setProvider(new web3.providers.HttpProvider("https://ropsten.infura.io/i5B73ieEWv30x1P28jca"));
+    if(web3.isConnected())
+    {
+      console.log("Connected to remote node.")
+    }
+    else
+    {
+      console.log("No connection. Program will exit.")
+      process.exit(0);
+    }
+  }
+}
 exports.getFromEthereumFunction=getFromEthereumFunction;
 exports.saveTransaction=saveTransaction;
 exports.getLatest=getLatest;
+exports.connectEthereum=connectEthereum;
