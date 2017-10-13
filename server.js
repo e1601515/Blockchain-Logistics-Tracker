@@ -20,6 +20,7 @@ app.listen(port, function() {
 var fromAccount = "0x15abD8B6b251Dac70B36C456BD880219080E153A";
 var privateKey = "";
 var cryptoPassword = "logistiikka";
+var txHash="";
 //rendering html from ejs template and sending to client
 app.get('/', function (req, res) {
   res.render('barcode2');
