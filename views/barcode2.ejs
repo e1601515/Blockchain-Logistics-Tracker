@@ -38,9 +38,15 @@ padding: 0px;
 <div id="title">
 <p>Packet ID </p>
 </div>
-<form action="/sendpacketid" method="post">
-<input name="packetID" type="search">
+<form action="/add" method="post">
+<input id=packetID name="packetID" type="search">
 <input name="companyName" type="hidden" value="VR">
 <button type="submit">Send</button>
 </form>
+<script>
+console.log("<%= printToClient %>");
+var items = [];
+items.push([<%=testArray%>]);
+console.log(items);
+</script>
 </body></html>

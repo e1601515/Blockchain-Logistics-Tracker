@@ -1,3 +1,4 @@
+var debug = true;
 var sqlite3 = require('sqlite3').verbose();
 
 var transactionDatabaseFilepath = "./database/transactionTrackingDB.db"
