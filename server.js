@@ -6,6 +6,7 @@ var bodyParser = require('body-parser')
 var ethereumModule = require('./project_modules/ethereumModule.js');
 var cryptoModule = require('./project_modules/cryptoModule.js');
 var databaseModule = require('./project_modules/databaseModule.js');
+var jsonModule = require('./project_modules/jsonModule.js');
 
 //initializing and starting web server
 var app = express();
@@ -18,7 +19,8 @@ app.listen(port, function() {
 
 //account
 //NEVER STORE THE PRIVATE KEY IN PUBLISHED SOURCE CODE!!!!
-var fromAccount = "0x15abD8B6b251Dac70B36C456BD880219080E153A";
+var fromAccount = "0x42A0193Dc3685a83d0c38d129feDb72b7d9262b0";
+//"0x15abD8B6b251Dac70B36C456BD880219080E153A";
 var privateKey = "";
 var cryptoPassword = "logistiikka";
 var txHash="";
@@ -57,14 +59,15 @@ app.get('/getFromEthereum', function (req, res)
   {
     var dataToDecrypt = ethereumModule.getFromEthereumFunction(txHash);
     var decryptedData = cryptoModule.decryptString(dataToDecrypt,cryptoPassword)
+    var timestampFromEthereum = ethereumModule.getTimestamp(txHash,"string");
     if(debug)
     {
       console.log("searching for: " + txHash);
       console.log("before decryption: " + dataToDecrypt);
       console.log("after decryption: " + decryptedData);
     }
-    //res.send("Packet info fetched from Ethereum: " + decryptedData);
-    res.render('barcode2');
+    res.send("Packet info fetched from Ethereum: " + decryptedData +"\nTime: "+timestampFromEthereum);
+    //res.render('barcode2');
   }
   else
   {
@@ -77,16 +80,19 @@ app.use(bodyParser.json() );
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.json());
 app.use(express.urlencoded());
+
 app.post('/add', function (req, res) {
   var packetIdFromClient=req.body.packetID;
   var companyNameFromClient=req.body.companyName;
-  databaseModule.findCompanyAccountFromDatabase(companyNameFromClient.toUpperCase());
+  //databaseModule.findCompanyAccountFromDatabase(companyNameFromClient.toUpperCase());
   databaseModule.checkCountForPacket(packetIdFromClient);
+  var toAccount = jsonModule.findCompanyAccount(companyNameFromClient.toUpperCase());
   //async issue forces timeout and separate getter
   setTimeout(delay,150);
   function delay()
   {
-    var toAccount = databaseModule.returnCompanyAccount();
+    //var toAccount = databaseModule.returnCompanyAccount();
+    //var toAccount = jsonModule.returnCompanyAccount();
     var txCount = databaseModule.returnCount();
     var activity;
     if(txCount==0||txCount % 2 == 0)

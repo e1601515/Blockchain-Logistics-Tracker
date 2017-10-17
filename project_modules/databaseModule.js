@@ -1,20 +1,20 @@
 var debug = true;
 var sqlite3 = require('sqlite3').verbose();
 
-var transactionDatabaseFilepath = "./database/transactionTrackingDB.db"
-var companyDatabaseFilepath = "./database/companyDB.db"
+var transactionDatabaseFilepath = "./storage/transactionTrackingDB.db"
+var companyDatabaseFilepath = "./storage/companyDB.db"
 
 var count=0;
 var foundEntries=[""];
 var foundCompanyAccount;
 
 
-var saveToDB = function(packetIdFromClient,txHash)
+var saveToDB = function(packetIdFromClient,txHash,unixTimestamp)
 {
   var txdb = new sqlite3.Database(transactionDatabaseFilepath);
   txdb.serialize(function()
   {
-    txdb.run("INSERT INTO TX(packetID,transactionID) VALUES('"+packetIdFromClient+"','"+txHash+"')");
+    txdb.run("INSERT INTO TX(packetID,transactionID,timestamp) VALUES('"+packetIdFromClient+"','"+txHash+"','"+unixTimestamp+"')");
   });
   txdb.close();
 }
@@ -74,7 +74,8 @@ var returnCount = function()
   return count;
   count=0;
 }
-
+//Company accounts are stored in JSON file.
+/*
 var findCompanyAccountFromDatabase = function(companyName)
 {
   var companydb = new sqlite3.Database(companyDatabaseFilepath);
@@ -101,11 +102,11 @@ var returnCompanyAccount = function()
   return foundCompanyAccount;
   foundCompanyAccount="";
 }
-
+*/
 exports.saveToDB=saveToDB;
 exports.loadFromDB=loadFromDB;
 exports.checkCountForPacket=checkCountForPacket;
-exports.findCompanyAccountFromDatabase=findCompanyAccountFromDatabase;
+//exports.findCompanyAccountFromDatabase=findCompanyAccountFromDatabase;
 exports.returnTXEntries=returnTXEntries;
 exports.returnCount=returnCount;
-exports.returnCompanyAccount=returnCompanyAccount;
+//exports.returnCompanyAccount=returnCompanyAccount;

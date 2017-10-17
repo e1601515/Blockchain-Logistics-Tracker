@@ -35,9 +35,35 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
       }
       else
       {
-        console.log("Transaction made with identifier: "+result);
         txHash=result;
-        databaseModule.saveToDB(packetIdFromClient,result);
+        var timeStamp="";
+        var intervalFunction = setInterval(
+        function delayTimestamp()
+        {
+          var found = false;
+            try
+            {
+              timeStamp = getTimestamp(result,"unix");
+            } catch (e)
+            {
+              console.log("Waiting for Ethereum. Just a moment.");
+            }
+            if(timeStamp!="")
+            {
+              databaseModule.saveToDB(packetIdFromClient,result,timeStamp);
+              found=true;
+              if(debug)
+                console.log("Timestamp: "+timeStamp+"\nSaved to database.");
+            }
+          if(found)
+            clearInterval(intervalFunction);
+        }
+        ,3000);
+        if(debug)
+        {
+          console.log("Transaction made with identifier: "+result);
+        }
+        timeStamp="";
       }
   });
 }
@@ -77,7 +103,29 @@ function connectEthereum()
   }
 }
 
+var getTimestamp = function(tx,mode)
+{
+  var unixTimeStamp = web3.eth.getBlock(web3.eth.getTransaction(tx).blockNumber).timestamp;
+  var timestamp = new Date(unixTimeStamp*1000);
+  if(mode=="unix")
+  {
+    return unixTimeStamp;
+  }
+  else if(mode=="date")
+  {
+    return timestamp;
+  }
+  else if(mode=="string")
+  {
+    return timestamp.toString();
+  }
+  return timestamp;
+  if(debug)
+    console.log(timestamp.toString());
+}
+
 exports.getFromEthereumFunction=getFromEthereumFunction;
 exports.saveTransaction=saveTransaction;
 exports.getLatest=getLatest;
 exports.connectEthereum=connectEthereum;
+exports.getTimestamp=getTimestamp;
