@@ -23,7 +23,7 @@ var findCompanyAccount = function(searchTerm)
   }
   if(accountID=="")
   {
-    console.log("No company found. Using default account for miscallenous.");
+    console.log("No company account found. Using default account for miscallenous.");
     return "0xf81D26ae334E416d09828312794A3c2F0A81B02A";
   }
   else

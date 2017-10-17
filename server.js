@@ -84,10 +84,11 @@ app.use(express.urlencoded());
 app.post('/add', function (req, res) {
   var packetIdFromClient=req.body.packetID;
   var companyNameFromClient=req.body.companyName;
+  //2nd db replaced with json
   //databaseModule.findCompanyAccountFromDatabase(companyNameFromClient.toUpperCase());
   databaseModule.checkCountForPacket(packetIdFromClient);
   var toAccount = jsonModule.findCompanyAccount(companyNameFromClient.toUpperCase());
-  //async issue forces timeout and separate getter
+  //async issue forces timeout and separate getter. 150ms has decent tolerance as measured requirement was just 3ms
   setTimeout(delay,150);
   function delay()
   {
@@ -107,7 +108,7 @@ app.post('/add', function (req, res) {
     var dataToEncrypt="'packetID':'"+packetIdFromClient+"';'activity':'"+activity+"';'userName':'users name here';'companyName':'"+companyNameFromClient+"';'gpsLongitude':'gps here';'gpslatitude':'gps here';'locationByGPS':'address/town here'";
     //crypting
     let encryptedDataToSave = cryptoModule.encryptString(dataToEncrypt,cryptoPassword);
-    ethereumModule.saveTransaction(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient,companyNameFromClient);
+    ethereumModule.saveTransaction(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient);
     if(debug)
     {
       console.log("Packet ID received from the client: " + packetIdFromClient);

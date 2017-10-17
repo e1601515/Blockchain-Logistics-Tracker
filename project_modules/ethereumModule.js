@@ -7,7 +7,7 @@ var databaseModule = require('./databaseModule.js');
 var txHash;
 var web3 = new Web3();
 
-var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient,companyNameFromClient)
+var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient)
 {
   var rawTx =
   {
