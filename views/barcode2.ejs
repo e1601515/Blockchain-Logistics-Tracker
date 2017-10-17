@@ -37,6 +37,9 @@ padding: 0px;
 
 <div id="title">
 <p>Packet ID </p>
+  <div>
+    <h1><%=messageToClient%></h1>
+  </div>
 </div>
 <form action="/add" method="post">
 <input id=packetID name="packetID" type="search">
@@ -44,9 +47,5 @@ padding: 0px;
 <button type="submit">Send</button>
 </form>
 <script>
-console.log("<%= printToClient %>");
-var items = [];
-items.push([<%=testArray%>]);
-console.log(items);
 </script>
 </body></html>
