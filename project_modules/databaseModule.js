@@ -35,21 +35,23 @@ var loadFromDB = function(searchTerm)
   });
   txdb.close();
 }
-
 var returnTXEntries = function()
 {
-  if(foundEntries.length==0)
+  if(debug)
   {
-    console.log("None found from DB!");
-  }
-  else
-  {
-    console.log(foundEntries.length+" entries found")
+    if(foundEntries.length==0)
+    {
+      console.log("None found from DB!");
+    }
+    else
+    {
+      console.log(foundEntries.length+" entries found")
       for(var j=0;j<foundEntries.length;j+=1)
       {
         console.log("\n"+foundEntries[j]);
       }
     }
+  }
   return foundEntries;
   foundEntries=[""];
 }
@@ -68,12 +70,12 @@ var checkCountForPacket = function(searchTerm)
   });
   txdb.close();
 }
-
 var returnCount = function()
 {
   return count;
   count=0;
 }
+
 //Company accounts are stored in JSON file.
 /*
 var findCompanyAccountFromDatabase = function(companyName)
@@ -96,17 +98,20 @@ var findCompanyAccountFromDatabase = function(companyName)
   });
   companydb.close();
 }
-
 var returnCompanyAccount = function()
 {
   return foundCompanyAccount;
   foundCompanyAccount="";
 }
 */
+
 exports.saveToDB=saveToDB;
+
 exports.loadFromDB=loadFromDB;
-exports.checkCountForPacket=checkCountForPacket;
-//exports.findCompanyAccountFromDatabase=findCompanyAccountFromDatabase;
 exports.returnTXEntries=returnTXEntries;
+
+exports.checkCountForPacket=checkCountForPacket;
 exports.returnCount=returnCount;
+
+//exports.findCompanyAccountFromDatabase=findCompanyAccountFromDatabase;
 //exports.returnCompanyAccount=returnCompanyAccount;

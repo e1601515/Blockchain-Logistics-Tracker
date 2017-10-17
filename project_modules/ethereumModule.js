@@ -5,80 +5,8 @@ var tx = require('ethereumjs-tx');
 var lightwallet = require('eth-lightwallet');
 var databaseModule = require('./databaseModule.js');
 var txHash;
+var previousNonce=0;
 var web3 = new Web3();
-
-var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient)
-{
-  var rawTx =
-  {
-    from: fromAccount,
-    to: toAccount,
-    value: web3.toHex(0),
-    //this methdod fetches the integer that represents the count of transactions.
-    //if we knew this already, we could create transactions without our Ethereum node being fully synced.
-    nonce: web3.toHex(web3.eth.getTransactionCount(fromAccount)),
-    gasLimit: web3.toHex(800000),
-    gasPrice: web3.toHex(20000000000),
-    data: web3.toHex(encryptedDataToSave)
-  };
-  //var txutils = lightwallet.txutils;
-  var transaction = new tx(rawTx);
-  var hexPrivateKey = new Buffer(privateKey, 'hex');
-  transaction.sign(hexPrivateKey);
-  var serializedTx = transaction.serialize().toString('hex');
-  web3.eth.sendRawTransaction(
-  '0x' + serializedTx, function(err, result)
-  {
-      if(err)
-      {
-        console.log(err);
-      }
-      else
-      {
-        txHash=result;
-        var timeStamp="";
-        var intervalFunction = setInterval(
-        function delayTimestamp()
-        {
-          var found = false;
-            try
-            {
-              timeStamp = getTimestamp(result,"unix");
-            } catch (e)
-            {
-              console.log("Waiting for Ethereum. Just a moment.");
-            }
-            if(timeStamp!="")
-            {
-              databaseModule.saveToDB(packetIdFromClient,result,timeStamp);
-              found=true;
-              if(debug)
-                console.log("Timestamp: "+timeStamp+"\nSaved to database.");
-            }
-          if(found)
-            clearInterval(intervalFunction);
-        }
-        ,3000);
-        if(debug)
-        {
-          console.log("Transaction made with identifier: "+result);
-        }
-        timeStamp="";
-      }
-  });
-}
-
-var getLatest = function()
-{
-  return txHash;
-}
-
-var getFromEthereumFunction = function(searchTerm)
-{
-  var transactionFromEthereum = web3.toAscii(web3.eth.getTransaction(searchTerm).input);
-  return transactionFromEthereum;
-}
-
 
 function connectEthereum()
 {
@@ -103,6 +31,82 @@ function connectEthereum()
   }
 }
 
+var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient)
+{
+  //this is for fastly repeated run so that nonce if increased if transactioncount didnt update fast enought in ethereum
+  var dynamicNonce = web3.eth.getTransactionCount(fromAccount);
+  if(dynamicNonce<=previousNonce)
+    dynamicNonce=previousNonce+1;
+  previousNonce = dynamicNonce;
+  if(debug)
+    console.log("NONCE " + dynamicNonce);
+  var rawTx =
+  {
+    from: fromAccount,
+    to: toAccount,
+    value: web3.toHex(0),
+    //this methdod fetches the integer that represents the count of transactions.
+    nonce: web3.toHex(dynamicNonce),
+    gasLimit: web3.toHex(800000),
+    gasPrice: web3.toHex(20000000000),
+    data: web3.toHex(encryptedDataToSave)
+  };
+  //var txutils = lightwallet.txutils;
+  var transaction = new tx(rawTx);
+  var hexPrivateKey = new Buffer(privateKey, 'hex');
+  transaction.sign(hexPrivateKey);
+  var serializedTx = transaction.serialize().toString('hex');
+  web3.eth.sendRawTransaction(
+  '0x' + serializedTx, function(err, result)
+  {
+      if(err)
+      {
+        console.log(err);
+      }
+      else
+      {
+        txHash=result;
+        var timeStamp="";
+        console.log("Waiting for next Block to be mined.");
+        var intervalFunction = setInterval(
+        function delayTimestamp()
+        {
+          var found = false;
+            try
+            {
+              timeStamp = getTimestamp(result,"unix");
+            } catch (e)
+            {
+              console.log("Still in queue. Please stand by.");
+            }
+            if(timeStamp!="")
+            {
+              databaseModule.saveToDB(packetIdFromClient,result,timeStamp);
+              clearInterval(intervalFunction);
+              console.log("Block mined with timestamp: "+timeStamp+"\nTransaction for packet "+packetIdFromClient+" saved to database.");
+            }
+        }
+        ,5000);
+        if(debug)
+        {
+          console.log("Transaction made with identifier: "+result);
+        }
+        timeStamp="";
+      }
+  });
+}
+
+var getLatest = function()
+{
+  return txHash;
+}
+
+var getFromEthereumFunction = function(searchTerm)
+{
+  var transactionFromEthereum = web3.toAscii(web3.eth.getTransaction(searchTerm).input);
+  return transactionFromEthereum;
+}
+
 var getTimestamp = function(tx,mode)
 {
   var unixTimeStamp = web3.eth.getBlock(web3.eth.getTransaction(tx).blockNumber).timestamp;
@@ -119,13 +123,10 @@ var getTimestamp = function(tx,mode)
   {
     return timestamp.toString();
   }
-  return timestamp;
-  if(debug)
-    console.log(timestamp.toString());
 }
 
-exports.getFromEthereumFunction=getFromEthereumFunction;
-exports.saveTransaction=saveTransaction;
-exports.getLatest=getLatest;
 exports.connectEthereum=connectEthereum;
+exports.saveTransaction=saveTransaction;
+exports.getFromEthereumFunction=getFromEthereumFunction;
+exports.getLatest=getLatest;
 exports.getTimestamp=getTimestamp;

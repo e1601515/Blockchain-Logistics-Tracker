@@ -1,4 +1,4 @@
-var debug = true;
+var debug = false;
 var fs = require("fs");
 var findCompanyAccount = function(searchTerm)
 {
