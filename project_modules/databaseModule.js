@@ -72,8 +72,12 @@ var checkCountForPacket = function(searchTerm)
 }
 var returnCount = function()
 {
-  return count;
+  var returningCount;
+  returningCount=count;
   count=0;
+  if(debug)
+    console.log("reseted count "+count);
+  return returningCount;
 }
 
 //Company accounts are stored in JSON file.

@@ -67,7 +67,6 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
       {
         txHash=result;
         var timeStamp="";
-        console.log("Waiting for next Block to be mined.");
         var intervalFunction = setInterval(
         function delayTimestamp()
         {
@@ -77,7 +76,8 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
               timeStamp = getTimestamp(result,"unix");
             } catch (e)
             {
-              console.log("Still in queue. Please stand by.");
+              if(debug)
+                console.log("Waiting for next Block to be mined...");
             }
             if(timeStamp!="")
             {
