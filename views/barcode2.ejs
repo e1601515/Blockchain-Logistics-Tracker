@@ -38,14 +38,15 @@ padding: 0px;
 <div id="title">
 <p>Packet ID </p>
   <div>
-    <h1><%=messageToClient%></h1>
+    <h4><%=messageToClient%></h4>
   </div>
 </div>
 <form action="/add" method="post">
 <input id=packetID name="packetID" type="search">
 <input name="companyName" type="hidden" value="VR">
-<button type="submit">Send</button>
+<button type="submit">OK</button>
 </form>
 <script>
+var suggestions="<%=suggestions%>";
 </script>
 </body></html>

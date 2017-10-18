@@ -2,12 +2,11 @@ var debug = true;
 var sqlite3 = require('sqlite3').verbose();
 
 var transactionDatabaseFilepath = "./storage/transactionTrackingDB.db"
-var companyDatabaseFilepath = "./storage/companyDB.db"
 
 var count=0;
 var foundEntries=[""];
 var foundCompanyAccount;
-
+var list="";
 
 var saveToDB = function(packetIdFromClient,txHash,unixTimestamp)
 {
@@ -80,6 +79,25 @@ var returnCount = function()
   return returningCount;
 }
 
+var listPacketID = function()
+{
+  var txdb = new sqlite3.Database(transactionDatabaseFilepath);
+  txdb.each("SELECT * FROM TX", function(err, row) {
+    if(row != null)
+    {
+      list=list+row.packetID+";";
+    }
+  });
+  txdb.close();
+}
+
+var returnPacketList = function()
+{
+  if(debug)
+    console.log("List of packets in database sent as predictive text input: "+list);
+  return list;
+}
+
 //Company accounts are stored in JSON file.
 /*
 var findCompanyAccountFromDatabase = function(companyName)
@@ -116,6 +134,9 @@ exports.returnTXEntries=returnTXEntries;
 
 exports.checkCountForPacket=checkCountForPacket;
 exports.returnCount=returnCount;
+
+exports.listPacketID=listPacketID;
+exports.returnPacketList=returnPacketList;
 
 //exports.findCompanyAccountFromDatabase=findCompanyAccountFromDatabase;
 //exports.returnCompanyAccount=returnCompanyAccount;
