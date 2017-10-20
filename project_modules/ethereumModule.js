@@ -18,7 +18,7 @@ function connectEthereum()
   else
   {
     console.log("Can't connect to local node. Trying remote node.")
-    web3.setProvider(new web3.providers.HttpProvider("https://ropsten.infura.io/i5B73ieEWv30x1P28jca"));
+    web3.setProvider(new web3.providers.HttpProvider(""));
     if(web3.isConnected())
     {
       console.log("Connected to remote node.")
@@ -77,7 +77,7 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
             } catch (e)
             {
               if(debug)
-                console.log("Waiting for next Block to be mined...");
+                console.log("Waiting for Block to be mined...");
             }
             if(timeStamp!="")
             {
@@ -86,7 +86,7 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
               console.log("Block mined with timestamp: "+timeStamp+"\nTransaction for packet "+packetIdFromClient+" saved to database.");
             }
         }
-        ,5000);
+        ,10000);
         if(debug)
         {
           console.log("Transaction made with identifier: "+result);
@@ -101,7 +101,7 @@ var getLatest = function()
   return txHash;
 }
 
-var getFromEthereumFunction = function(searchTerm)
+var getFromEthereum = function(searchTerm)
 {
   var transactionFromEthereum = web3.toAscii(web3.eth.getTransaction(searchTerm).input);
   return transactionFromEthereum;
@@ -127,6 +127,6 @@ var getTimestamp = function(tx,mode)
 
 exports.connectEthereum=connectEthereum;
 exports.saveTransaction=saveTransaction;
-exports.getFromEthereumFunction=getFromEthereumFunction;
+exports.getFromEthereum=getFromEthereum;
 exports.getLatest=getLatest;
 exports.getTimestamp=getTimestamp;

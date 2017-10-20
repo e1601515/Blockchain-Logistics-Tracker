@@ -13,12 +13,12 @@ var findCompanyAccount = function(searchTerm)
     }
     if(debug)
     {
-    console.log("SEARCH TERM: "+searchTerm);
-    console.log("FROM JSON "+jsonContent.companies[company].companyName);
+    console.log("search term: "+searchTerm);
+    console.log("json company: "+jsonContent.companies[company].companyName);
     if(searchTerm==jsonContent.companies[company].companyName)
       console.log("MATCH");
-    console.log("FROM JSON "+jsonContent.companies[company].accountID);
-    console.log("ACCOUNT: "+accountID);
+    console.log("json account: "+jsonContent.companies[company].accountID);
+    //console.log("as variable: "+accountID);
     }
   }
   if(accountID=="")

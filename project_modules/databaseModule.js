@@ -74,18 +74,19 @@ var returnCount = function()
   var returningCount;
   returningCount=count;
   count=0;
-  if(debug)
-    console.log("reseted count "+count);
+  //if(debug)
+    //console.log("reseted count "+count);
   return returningCount;
 }
 
 var listPacketID = function()
 {
   var txdb = new sqlite3.Database(transactionDatabaseFilepath);
-  txdb.each("SELECT * FROM TX", function(err, row) {
+  txdb.each("SELECT * FROM TX ORDER BY timestamp DESC", function(err, row) {
     if(row != null)
     {
-      list=list+row.packetID+";";
+      if(!list.includes(";"+row.packetID+";") && row.packetID.length>2)
+        list+=";"+row.packetID;
     }
   });
   txdb.close();
@@ -93,9 +94,11 @@ var listPacketID = function()
 
 var returnPacketList = function()
 {
+  var returningList = list;
+  list = "";
   if(debug)
-    console.log("List of packets in database sent as predictive text input: "+list);
-  return list;
+    console.log("List of packets in database sent as predictive text input: "+returningList);
+  return returningList;
 }
 
 //Company accounts are stored in JSON file.
