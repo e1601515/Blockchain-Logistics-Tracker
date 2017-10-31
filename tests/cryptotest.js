@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const cipher = crypto.createCipher('aes192', 'logistiikka');
 const decipher = crypto.createDecipher('aes192', 'logistiikka');
 
-let encrypted = cipher.update('some clear text data', 'utf8', 'hex');
+let encrypted = cipher.update('jotain tekstia', 'utf8', 'hex');
 encrypted += cipher.final('hex');
 console.log(encrypted);
 

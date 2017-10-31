@@ -33,7 +33,7 @@ function connectEthereum()
 
 var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient)
 {
-  //this is for fastly repeated run so that nonce if increased if transactioncount didnt update fast enought in ethereum
+  //this is for fastly repeated run so that nonce is increased if transactioncount didnt update fast enough in ethereum
   var dynamicNonce = web3.eth.getTransactionCount(fromAccount);
   if(dynamicNonce<=previousNonce)
     dynamicNonce=previousNonce+1;
@@ -67,8 +67,8 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
       {
         txHash=result;
         var timeStamp="";
-        var intervalFunction = setInterval(
-        function delayTimestamp()
+        databaseModule.saveToDB(packetIdFromClient,result);
+        var intervalFunction = setInterval(function delayTimestamp()
         {
           var found = false;
             try
@@ -81,14 +81,16 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
             }
             if(timeStamp!="")
             {
-              databaseModule.saveToDB(packetIdFromClient,result,timeStamp);
+              databaseModule.addTimestamp(result,timeStamp);
               clearInterval(intervalFunction);
-              console.log("Block mined with timestamp: "+timeStamp+"\nTransaction for packet "+packetIdFromClient+" saved to database.");
+              if(debug)
+                console.log("Block mined with timestamp: "+getTimestamp(result,"string")+". Added to DB entry.");
             }
         }
         ,10000);
         if(debug)
         {
+          console.log("Transaction for packet "+packetIdFromClient+" saved to database.")
           console.log("Transaction made with identifier: "+result);
         }
         timeStamp="";

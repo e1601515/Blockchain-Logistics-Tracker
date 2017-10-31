@@ -3,77 +3,127 @@ var sqlite3 = require('sqlite3').verbose();
 
 var transactionDatabaseFilepath = "./storage/transactionTrackingDB.db"
 
-var count=0;
-var foundEntries=[""];
-var foundCompanyAccount;
+var count=-1;
+var foundEntries=null;
 var list="";
 
-var saveToDB = function(packetIdFromClient,txHash,unixTimestamp)
+var isReserved = function()
+{
+  if(count==-1&&foundEntries==null&&list=="")
+  {
+    return false;
+  }
+  else
+  {
+    if(debug)
+    {
+      console.log("busy with:");
+      console.log("count "+count);
+      console.log("found "+foundEntries);
+      console.log("list "+list);
+    }
+    return true;
+  }
+}
+
+var saveToDB = function(packetIdFromClient,txHash)
 {
   var txdb = new sqlite3.Database(transactionDatabaseFilepath);
   txdb.serialize(function()
   {
-    txdb.run("INSERT INTO TX(packetID,transactionID,timestamp) VALUES('"+packetIdFromClient+"','"+txHash+"','"+unixTimestamp+"')");
+    txdb.run("INSERT INTO TX(packetID,transactionID) VALUES('"+packetIdFromClient+"','"+txHash+"')");
   });
   txdb.close();
 }
 
+var addTimestamp = function(txHash,unixTimestamp)
+{
+  var txdb = new sqlite3.Database(transactionDatabaseFilepath);
+  txdb.serialize(function()
+  {
+    txdb.run("UPDATE TX SET timestamp= '"+unixTimestamp+"' WHERE transactionID='"+txHash+"'");
+  });
+  txdb.close();
+}
+
+
+
 var loadFromDB = function(searchTerm)
 {
+  tempEntries1="";
+  tempEntries2="";
   var txdb = new sqlite3.Database(transactionDatabaseFilepath);
   txdb.serialize(function()
   {
     txdb.each("SELECT * FROM TX WHERE packetID='"+searchTerm+"'", function(err, row) {
-      var i=0;
       if(row != null)
       {
-        foundEntries[i]="'"+row.packetID+"':'"+row.transactionID+"';";
-        i+=1;
+        tempEntries1+="'"+row.packetID+"':'"+row.transactionID+"',";
       }
     });
   });
   txdb.close();
+  var checkIfEntriesUpdated = setInterval(function()
+  {
+    if(tempEntries1!=tempEntries2)
+    {
+      tempEntries2=tempEntries1;
+    }
+    else
+    {
+      foundEntries=tempEntries1;
+      clearInterval(checkIfEntriesUpdated);
+    }
+  },30);
 }
 var returnTXEntries = function()
 {
-  if(debug)
-  {
-    if(foundEntries.length==0)
+    if(foundEntries=="")
     {
       console.log("None found from DB!");
     }
     else
     {
-      console.log(foundEntries.length+" entries found")
-      for(var j=0;j<foundEntries.length;j+=1)
-      {
-        console.log("\n"+foundEntries[j]);
-      }
+      var returningFoundEntries=foundEntries;
+      foundEntries=null;
+      return returningFoundEntries;
     }
-  }
-  return foundEntries;
-  foundEntries=[""];
 }
 
 var checkCountForPacket = function(searchTerm)
 {
+  var tempCount1=0;
+  var tempCount2=0;
   var txdb = new sqlite3.Database(transactionDatabaseFilepath);
   txdb.serialize(function()
   {
     txdb.each("SELECT * FROM TX WHERE packetID='"+searchTerm+"'", function(err, row) {
       if(row != null)
       {
-        count+=1;
+        tempCount1+=1;
       }
     });
   });
   txdb.close();
+  //checks every 15ms if each function found more. this is so that we dont change (and therefore return) count before it has processed all rows from db
+  var checkIfCountUpdated = setInterval(function()
+  {
+    if(tempCount1>tempCount2)
+    {
+      tempCount2=tempCount1;
+    }
+    else
+    {
+      count=tempCount1;
+      clearInterval(checkIfCountUpdated);
+    }
+  },30);
 }
 var returnCount = function()
 {
   var returningCount;
   returningCount=count;
-  count=0;
+  count=-1;
   //if(debug)
     //console.log("reseted count "+count);
   return returningCount;
@@ -96,8 +146,6 @@ var returnPacketList = function()
 {
   var returningList = list;
   list = "";
-  if(debug)
-    console.log("List of packets in database sent as predictive text input: "+returningList);
   return returningList;
 }
 
@@ -130,7 +178,10 @@ var returnCompanyAccount = function()
 }
 */
 
+exports.isReserved=isReserved;
+
 exports.saveToDB=saveToDB;
+exports.addTimestamp=addTimestamp;
 
 exports.loadFromDB=loadFromDB;
 exports.returnTXEntries=returnTXEntries;
