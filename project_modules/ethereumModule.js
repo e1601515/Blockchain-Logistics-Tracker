@@ -25,7 +25,7 @@ function connectEthereum()
     }
     else
     {
-      console.log("No connection. Program will exit.")
+      console.log("No connection or remote API key. Program will exit.")
       process.exit(0);
     }
   }
