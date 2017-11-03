@@ -3,7 +3,7 @@ var Web3 = require('web3');
 //var util = require('ethereumjs-util');
 var tx = require('ethereumjs-tx');
 var lightwallet = require('eth-lightwallet');
-var databaseModule = require('./databaseModule.js');
+var databaseModule = require('../db/databaseModule.js');
 var txHash;
 var previousNonce=0;
 var web3 = new Web3();

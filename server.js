@@ -3,10 +3,10 @@ var debug = true;
 var express = require('express');
 var bodyParser = require('body-parser')
 //adding external .js file
-var ethereumModule = require('./project_modules/ethereumModule.js');
-var cryptoModule = require('./project_modules/cryptoModule.js');
-var databaseModule = require('./project_modules/databaseModule.js');
-var jsonModule = require('./project_modules/jsonModule.js');
+var ethereumModule = require('./ethereum/ethereumModule.js');
+var cryptoModule = require('./crypto/cryptoModule.js');
+var databaseModule = require('./db/databaseModule.js');
+var jsonModule = require('./json/jsonModule.js');
 
 //initializing and starting web server
 var app = express();
@@ -25,7 +25,8 @@ var cryptoPassword = "logistiikka";
 var txHash="";
 
 app.locals.messageToClient="";
-
+app.locals.suggestions="";
+app.locals.retrievedPackets="";
 //rendering html from ejs template and sending to client
 app.get('/', function (req, res)
 {
@@ -105,6 +106,7 @@ app.get('/print', function (req, res)
         hashEntry[1]=hashEntry[1].replace("'","");
         stringFromEthereum=ethereumModule.getFromEthereum(hashEntry[1]);
         decryptedStrings+=',"packet'+i+'":'+'{'+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string")+'"}';
+        //decryptedStrings+=";"+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string");
         if(debug)
         {
           console.log(hashEntry[1]);
@@ -116,7 +118,10 @@ app.get('/print', function (req, res)
     {
       decryptedStrings=decryptedStrings.replace(',',"");
       var newJSON = JSON.parse('{"packets":{'+decryptedStrings+'}}')
-      res.json(newJSON);
+      app.locals.retrievedPackets=JSON.stringify(newJSON);
+      //res.json(newJSON);
+      //app.locals.retrievedPackets=decryptedStrings;
+      res.render('barcode2');
     },2000);
   },300);
 });
@@ -129,6 +134,14 @@ app.use(express.urlencoded());
 app.post('/add', function (req, res) {
   var packetIdFromClient=req.body.packetID;
   var companyNameFromClient=req.body.companyName;
+  //no drop table attacks here! sanitazing input
+  while(packetIdFromClient.includes("'")||packetIdFromClient.includes('"')||companyNameFromClient.includes("'")||companyNameFromClient.includes('"'))
+  {
+    packetIdFromClient=packetIdFromClient.replace("'","");
+    packetIdFromClient=packetIdFromClient.replace('"','');
+    companyNameFromClient=companyNameFromClient.replace("'","");
+    companyNameFromClient=companyNameFromClient.replace('"','');
+}
   //2nd db replaced with json
   //databaseModule.findCompanyAccountFromDatabase(companyNameFromClient.toUpperCase());
   var busyCheck = setInterval(function()

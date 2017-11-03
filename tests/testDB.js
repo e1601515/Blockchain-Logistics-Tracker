@@ -1,5 +1,5 @@
-var databaseModule = require('./project_modules/databaseModule.js');
-var databaseModule2 = require('./project_modules/databaseModule.js');
+var databaseModule = require('../db/databaseModule.js');
+var databaseModule2 = require('../db/databaseModule.js');
 
 //databaseModule.checkCountForPacket("1234");
 databaseModule.loadFromDB("1234");
