@@ -31,12 +31,4 @@ var findCompanyAccount = function(searchTerm)
     return accountID;
   }
 }
-//Separate functions with timeout not currently required.
-/*
-var returnCompanyAccount = function()
-{
-  return accountID;
-}
-*/
 exports.findCompanyAccount=findCompanyAccount;
-//exports.returnCompanyAccount=returnCompanyAccount;
