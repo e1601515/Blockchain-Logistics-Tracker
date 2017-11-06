@@ -172,10 +172,10 @@ app.post('/', function (req, res)
           ethereumModule.saveTransaction(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient);
           app.locals.messageToClient=messageToClient;
           //refresing the input suggestions
-          databaseModule.listPacketID()
+          databaseModule.listPacketID();
           var refreshedPage = setInterval(function ()
           {
-            if(databaseModule.returnPacketList!="")
+            if(databaseModule.returnPacketList()!=null)
             {
               app.locals.suggestions=databaseModule.returnPacketList();
               res.redirect('/');
