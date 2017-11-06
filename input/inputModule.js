@@ -13,9 +13,9 @@ var sanitizeInput = function(input)
   return input;
 }
 
-var jsonifyString = function(packetIdFromClient,activity,companyNameFromClient)
+var jsonifyString = function(packetIdFromClient,activity,companyNameFromClient,latitude,longitude,addressJSON)
 {
-  var jsonifiedString = '"packetID":"'+packetIdFromClient+'","activity":"'+activity+'","userName":"users name here","companyName":"'+companyNameFromClient+'","gpsLongitude":"gps here","gpslatitude":"gps here","locationByGPS":"address/town here"';
+  var jsonifiedString = '"packetID":"'+packetIdFromClient+'","activity":"'+activity+'","userName":"users name here","companyName":"'+companyNameFromClient+'","gpsLatitude":"'+latitude+'","gpsLongitude":"'+longitude+'","locationByGPS":'+addressJSON;
   if (debug)
     console.log("jsonified data before encryption: "+jsonifiedString);
   return jsonifiedString;

@@ -50,7 +50,7 @@ app.get('/', function (req, res)
       },25);
       clearInterval(checkIfBusy);
     }
-  },100);
+  },500);
 })
 
 app.get('/getTx', function (req, res)
@@ -91,41 +91,69 @@ app.get('/getFromEthereum', function (req, res)
 app.get('/print', function (req, res)
 {
   var entriesFromDB;
-  var stringFromEthereum;
-  var decryptedStrings = "";
-  databaseModule.loadFromDB('43217');
-  setTimeout(function()
+  var stringFromEthereum,decryptedStrings2;
+  var decryptedStrings1 = "";
+  var decryptedStringsFinal = "";
+  var busyCheckForPrint = setInterval(function()
   {
-    entriesFromDB = databaseModule.returnTXEntries();
-    entriesFromDB=entriesFromDB.split(',');
-    var hashEntry;
-    for(var i=0;i<entriesFromDB.length;i+=1)
+    if(databaseModule.isReserved()==false)
     {
-      hashEntry=entriesFromDB[i].split(':');
-      if(hashEntry[0]!=null && hashEntry[1]!=null)
+      databaseModule.loadFromDB('5551');
+      var entriesFound = setInterval(function()
       {
-        hashEntry[1]=hashEntry[1].replace("'","");
-        hashEntry[1]=hashEntry[1].replace("'","");
-        stringFromEthereum=ethereumModule.getFromEthereum(hashEntry[1]);
-        decryptedStrings+=',"packet'+i+'":'+'{'+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string")+'"}';
-        //decryptedStrings+=";"+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string");
-        if(debug)
+        entriesFromDB = databaseModule.returnTXEntries();
+        if(entriesFromDB!=null)
         {
-          console.log(hashEntry[1]);
-          //console.log("after adding "+decryptedStrings);
+          entriesFromDB = entriesFromDB.split(',');
+          var hashEntry;
+          for(var i=0;i<entriesFromDB.length;i+=1)
+          {
+            hashEntry=entriesFromDB[i].split(':');
+            if(hashEntry[0]!="" && hashEntry[1]!="" && hashEntry[0]!=null && hashEntry[1]!=null)
+            {
+              hashEntry[1]=hashEntry[1].replace("'","");
+              hashEntry[1]=hashEntry[1].replace("'","");
+              stringFromEthereum=ethereumModule.getFromEthereum(hashEntry[1]);
+              decryptedStrings1+=',"entry'+i+'":'+'{'+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string")+'"}';
+              //decryptedStrings+=";"+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string");
+              if(debug)
+              {
+                //console.log(hashEntry[1]);
+                //console.log("after adding "+decryptedStrings1);
+              }
+            }
+          }
+          var checkIfMoreFromEthereum = setInterval(function()
+          {
+            if(decryptedStrings1!=decryptedStrings2)
+            {
+              decryptedStrings2=decryptedStrings1;
+            }
+            else
+            {
+              decryptedStringsFinal=decryptedStrings1;
+              clearInterval(checkIfMoreFromEthereum);
+            }
+          },25)
+          clearInterval(entriesFound);
         }
-      }
+      },25)
+      var printingResults = setInterval(function()
+      {
+        if(decryptedStringsFinal!="")
+        {
+          decryptedStringsFinal=decryptedStringsFinal.replace(',',"");
+          var newJSON = JSON.parse('{"packets":{'+decryptedStringsFinal+'}}')
+          //app.locals.retrievedPackets=decryptedStrings;
+          app.locals.retrievedPackets=JSON.stringify(newJSON);
+          res.json(newJSON);
+          //res.render('barcode2');
+          clearInterval(printingResults);
+        }
+      },25);
+      clearInterval(busyCheckForPrint);
     }
-    setTimeout(function()
-    {
-      decryptedStrings=decryptedStrings.replace(',',"");
-      var newJSON = JSON.parse('{"packets":{'+decryptedStrings+'}}')
-      app.locals.retrievedPackets=JSON.stringify(newJSON);
-      //res.json(newJSON);
-      //app.locals.retrievedPackets=decryptedStrings;
-      res.render('barcode2');
-    },2000);
-  },300);
+  },500);
 });
 //initializing body parser so we can fetch data from text box
 app.use(bodyParser.json() );
@@ -135,10 +163,14 @@ app.use(express.urlencoded());
 
 app.post('/', function (req, res)
 {
-  //no injection attacks here! sanitazing input
+  //no injection attacks here! sanitizing input
   var packetIdFromClient=inputModule.sanitizeInput(req.body.packetID);
   var companyNameFromClient=inputModule.sanitizeInput(req.body.companyName);
-
+  //var longitude = inputModule.sanitizeInput(req.body.longitudeClient);
+  //var latitude = inputModule.sanitizeInput(req.body.latitudeClient);
+  var latitude = 33.7489;
+  var longitude = -84.3789;
+  //var addressJSON="default";
   //2nd db replaced with json
   //databaseModule.findCompanyAccountFromDatabase(companyNameFromClient.toUpperCase());
   var busyCheck = setInterval(function()
@@ -165,41 +197,61 @@ app.post('/', function (req, res)
             activity="deliver";
             messageToClient="Packet "+packetIdFromClient+" DELIVERED.";
           }
-          //will be generated by frontend inputs, but hard coding it for now
-          var dataToEncrypt=inputModule.jsonifyString(packetIdFromClient,activity,companyNameFromClient);
-          //crypting
-          let encryptedDataToSave = cryptoModule.encryptString(dataToEncrypt,cryptoPassword);
-          ethereumModule.saveTransaction(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient);
-          app.locals.messageToClient=messageToClient;
-          //refresing the input suggestions
-          databaseModule.listPacketID();
-          var refreshedPage = setInterval(function ()
-          {
-            if(databaseModule.returnPacketList()!=null)
+          var NodeGeocoder = require('node-geocoder');
+          var geocoder = NodeGeocoder();
+          //var addressJSON;
+          var addressJSON;
+          geocoder.reverse({lat:latitude,lon: longitude}, function(err, res) {
+            addressJSON=JSON.stringify(res);
+            addressJSON=addressJSON.replace("[","");
+            addressJSON=addressJSON.replace("]","");
+            if(debug)
             {
-              app.locals.suggestions=databaseModule.returnPacketList();
-              res.redirect('/');
-              clearInterval(refreshedPage);
-              if(debug)
-              {
-                console.log("Packet ID: " + packetIdFromClient);
-                console.log("Company name: " + companyNameFromClient);
-                console.log("Company account: " + toAccount);
-                console.log("Existing TX count in DB for the packet: " + txCount);
-                console.log("Current activity based on the count: " + activity);
-                console.log("Data after encryption " + encryptedDataToSave);
-              }
-              clearInterval(countFound);
+              console.log("Information of client: "+addressJSON);
             }
+          });
+          var locationFound = setInterval(function()
+          {
+            if(addressJSON!=null)
+            {
+              //crypting
+              var dataToEncrypt=inputModule.jsonifyString(packetIdFromClient,activity,companyNameFromClient,latitude,longitude,addressJSON);
+              let encryptedDataToSave = cryptoModule.encryptString(dataToEncrypt,cryptoPassword);
+              ethereumModule.saveTransaction(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient);
+              app.locals.messageToClient=messageToClient;
+              //refresing the input suggestions
+              databaseModule.listPacketID();
+              var refreshedPage = setInterval(function ()
+              {
+                var suggestionsInPost = databaseModule.returnPacketList();
+                if(suggestionsInPost!=null)
+                {
+                  app.locals.suggestions=suggestionsInPost;
+                  res.redirect('/');
+                  clearInterval(refreshedPage);
+                  if(debug)
+                  {
+                    console.log("Packet ID: " + packetIdFromClient);
+                    console.log("Company name: " + companyNameFromClient);
+                    console.log("Company account: " + toAccount);
+                    console.log("Existing TX count in DB for the packet: " + txCount);
+                    console.log("Current activity based on the count: " + activity);
+                    console.log("Data after encryption " + encryptedDataToSave);
+                  }
+                  clearInterval(countFound);
+                }
+              },25);
+              clearInterval(locationFound);
+            }
+          },50)
             //console.log("1");
-          },50);
         }
         //console.log("2");
-      },50);
+      },25);
       clearInterval(busyCheck);
     }
     //console.log("3");
-  },100);
+  },500);
 })
 
 

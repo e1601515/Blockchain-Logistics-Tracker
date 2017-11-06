@@ -5,11 +5,11 @@ var transactionDatabaseFilepath = "./storage/transactionTrackingDB.db"
 
 var count=-1;
 var foundEntries=null;
-var list="";
+var list=null;
 
 var isReserved = function()
 {
-  if(count==-1&&foundEntries==null&&list=="")
+  if(count==-1&&foundEntries==null&&list==null)
   {
     return false;
   }
@@ -78,16 +78,9 @@ var loadFromDB = function(searchTerm)
 }
 var returnTXEntries = function()
 {
-    if(foundEntries=="")
-    {
-      console.log("None found from DB!");
-    }
-    else
-    {
-      var returningFoundEntries=foundEntries;
-      foundEntries=null;
-      return returningFoundEntries;
-    }
+  var returningFoundEntries=foundEntries;
+  foundEntries=null;
+  return returningFoundEntries;
 }
 
 var checkCountForPacket = function(searchTerm)
@@ -125,18 +118,19 @@ var returnCount = function()
   returningCount=count;
   count=-1;
   //if(debug)
-    //console.log("reseted count "+count);
+  //console.log("reseted count "+count);
   return returningCount;
 }
 
 var listPacketID = function()
 {
   var txdb = new sqlite3.Database(transactionDatabaseFilepath);
+  list = "";
   txdb.each("SELECT * FROM TX ORDER BY timestamp DESC", function(err, row) {
     if(row != null)
     {
       if(!list.includes(";"+row.packetID+";") && row.packetID.length>2)
-        list+=";"+row.packetID;
+      list+=";"+row.packetID;
     }
   });
   txdb.close();
@@ -145,7 +139,7 @@ var listPacketID = function()
 var returnPacketList = function()
 {
   var returningList = list;
-  list = "";
+  list = null;
   return returningList;
 }
 
@@ -153,28 +147,28 @@ var returnPacketList = function()
 /*
 var findCompanyAccountFromDatabase = function(companyName)
 {
-  var companydb = new sqlite3.Database(companyDatabaseFilepath);
-  companydb.serialize(function()
-  {
-    companydb.get("SELECT * FROM COMPANYACCOUNTS WHERE companyName='"+companyName+"'", function(err, row) {
-      if(row!= null)
-      {
-        //console.log("found "+row.companyName + " " + row.accountID);
-        foundCompanyAccount = row.accountID;
-      }
-      else
-      {
-        console.log("No company found. Using default account for misc.");
-        foundCompanyAccount = "0xf81D26ae334E416d09828312794A3c2F0A81B02A";
-      }
-    });
-  });
-  companydb.close();
+var companydb = new sqlite3.Database(companyDatabaseFilepath);
+companydb.serialize(function()
+{
+companydb.get("SELECT * FROM COMPANYACCOUNTS WHERE companyName='"+companyName+"'", function(err, row) {
+if(row!= null)
+{
+//console.log("found "+row.companyName + " " + row.accountID);
+foundCompanyAccount = row.accountID;
+}
+else
+{
+console.log("No company found. Using default account for misc.");
+foundCompanyAccount = "0xf81D26ae334E416d09828312794A3c2F0A81B02A";
+}
+});
+});
+companydb.close();
 }
 var returnCompanyAccount = function()
 {
-  return foundCompanyAccount;
-  foundCompanyAccount="";
+return foundCompanyAccount;
+foundCompanyAccount="";
 }
 */
 
