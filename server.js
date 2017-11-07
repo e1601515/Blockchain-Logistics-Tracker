@@ -8,7 +8,8 @@ var cryptoModule = require('./crypto/cryptoModule.js');
 var databaseModule = require('./db/databaseModule.js');
 var jsonModule = require('./json/jsonModule.js');
 var inputModule = require('./input/inputModule.js');
-
+var NodeGeocoder = require('node-geocoder');
+var geocoder = NodeGeocoder();
 //initializing and starting web server
 var app = express();
 var port = 8080;
@@ -155,6 +156,7 @@ app.get('/print', function (req, res)
     }
   },500);
 });
+
 //initializing body parser so we can fetch data from text box
 app.use(bodyParser.json() );
 app.use(bodyParser.urlencoded({extended: true}));
@@ -164,94 +166,121 @@ app.use(express.urlencoded());
 app.post('/', function (req, res)
 {
   //no injection attacks here! sanitizing input
+  //receiving input element values from users submission
   var packetIdFromClient=inputModule.sanitizeInput(req.body.packetID);
   var companyNameFromClient=inputModule.sanitizeInput(req.body.companyName);
   //var longitude = inputModule.sanitizeInput(req.body.longitudeClient);
   //var latitude = inputModule.sanitizeInput(req.body.latitudeClient);
+
+  //hard coded while waiting UI to be built further
   var latitude = 33.7489;
   var longitude = -84.3789;
-  //var addressJSON="default";
-  //2nd db replaced with json
-  //databaseModule.findCompanyAccountFromDatabase(companyNameFromClient.toUpperCase());
-  var busyCheck = setInterval(function()
+
+  //variables for the input data parameter
+  var txCount,toAccount,activity,addressJSON;
+
+  //strings of full packet data
+  var dataToEncrypt;
+  let encryptedDataToSave;
+
+  //variables for the outputs to client
+  var suggestionsInPost,messageToClient;
+
+  //loops that have to be used for the async
+  var checkIfReservedLoop, getCountAndActivityLoop, encryptAndSendEthereumLoop, refreshPageLoop;
+
+  //starting the first loop
+  checkIfReservedLoop = setInterval(function()
   {
+    //If other clients dont have stored values on the way. We can begin the save.
     if(databaseModule.isReserved()==false)
     {
+      //finding out existing entry count and company account assigned to the company
       databaseModule.checkCountForPacket(packetIdFromClient);
-      var toAccount = jsonModule.findCompanyAccount(companyNameFromClient.toUpperCase());
-      //async issue forces timeout and separate getter. 150ms has decent tolerance as measured requirement was just 3ms
-      var countFound = setInterval(function ()
-      {
-        //var toAccount = databaseModule.returnCompanyAccount();
-        var txCount = databaseModule.returnCount();
-        var activity,messageToClient;
-        if(txCount>-1)
-        {
-          if(txCount==0||txCount % 2 == 0)
-          {
-            activity="receive";
-            messageToClient="Packet "+packetIdFromClient+" RECEIVED.";
-          }
-          else
-          {
-            activity="deliver";
-            messageToClient="Packet "+packetIdFromClient+" DELIVERED.";
-          }
-          var NodeGeocoder = require('node-geocoder');
-          var geocoder = NodeGeocoder();
-          //var addressJSON;
-          var addressJSON;
-          geocoder.reverse({lat:latitude,lon: longitude}, function(err, res) {
-            addressJSON=JSON.stringify(res);
-            addressJSON=addressJSON.replace("[","");
-            addressJSON=addressJSON.replace("]","");
-            if(debug)
-            {
-              console.log("Information of client: "+addressJSON);
-            }
-          });
-          var locationFound = setInterval(function()
-          {
-            if(addressJSON!=null)
-            {
-              //crypting
-              var dataToEncrypt=inputModule.jsonifyString(packetIdFromClient,activity,companyNameFromClient,latitude,longitude,addressJSON);
-              let encryptedDataToSave = cryptoModule.encryptString(dataToEncrypt,cryptoPassword);
-              ethereumModule.saveTransaction(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient);
-              app.locals.messageToClient=messageToClient;
-              //refresing the input suggestions
-              databaseModule.listPacketID();
-              var refreshedPage = setInterval(function ()
-              {
-                var suggestionsInPost = databaseModule.returnPacketList();
-                if(suggestionsInPost!=null)
-                {
-                  app.locals.suggestions=suggestionsInPost;
-                  res.redirect('/');
-                  clearInterval(refreshedPage);
-                  if(debug)
-                  {
-                    console.log("Packet ID: " + packetIdFromClient);
-                    console.log("Company name: " + companyNameFromClient);
-                    console.log("Company account: " + toAccount);
-                    console.log("Existing TX count in DB for the packet: " + txCount);
-                    console.log("Current activity based on the count: " + activity);
-                    console.log("Data after encryption " + encryptedDataToSave);
-                  }
-                  clearInterval(countFound);
-                }
-              },25);
-              clearInterval(locationFound);
-            }
-          },50)
-            //console.log("1");
-        }
-        //console.log("2");
-      },25);
-      clearInterval(busyCheck);
+      toAccount = jsonModule.findCompanyAccount(companyNameFromClient.toUpperCase());
+
+      //count is being retrieved from db, starting second loop to receive
+      getCountAndActivityLoop = setInterval(getCountAndActivity,25);
+      clearInterval(checkIfReservedLoop);
     }
-    //console.log("3");
+    //long delay->less chance to conflict as it checks if the modules are busy only at the start
   },500);
+
+  function getCountAndActivity()
+  {
+    txCount = databaseModule.returnCount();
+
+    //if none or even exist, we are receiving. if odd exists, we are already carrying the packet and giving it away next
+    if(txCount>-1)
+    {
+      if(txCount==0||txCount % 2 == 0)
+      {
+        activity="receive";
+        messageToClient="Packet "+packetIdFromClient+" RECEIVED.";
+      }
+      else
+      {
+        activity="deliver";
+        messageToClient="Packet "+packetIdFromClient+" DELIVERED.";
+      }
+
+      //we have count and activity, time to get location
+      initLocation();
+      clearInterval(getCountAndActivityLoop);
+    }
+  }
+
+  function initLocation()
+  {
+    //asynchronous retrieval of additional info based on gps coord, such as street address
+    geocoder.reverse({lat:latitude,lon: longitude}, function(err, res)
+    {
+      addressJSON=JSON.stringify(res);
+      addressJSON=addressJSON.replace("[","");
+      addressJSON=addressJSON.replace("]","");
+
+      if(debug)
+      {
+        console.log("Information of client: "+addressJSON);
+      }
+
+    });
+
+    //location info is being retrieved. Starting third loop.
+    encryptAndSendEthereumLoop = setInterval(encryptAndSendEthereum,50);
+  }
+
+  function encryptAndSendEthereum()
+  {
+    if(addressJSON!=null)
+    {
+      dataToEncrypt=inputModule.jsonifyString(packetIdFromClient,activity,companyNameFromClient,latitude,longitude,addressJSON);
+      encryptedDataToSave = cryptoModule.encryptString(dataToEncrypt,cryptoPassword);
+
+      ethereumModule.saveTransaction(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient);
+
+      printDebugs();
+
+      app.locals.messageToClient=messageToClient;
+      res.redirect('/');
+      clearInterval(encryptAndSendEthereumLoop);
+    }
+  }
+
+  function printDebugs()
+  {
+    if(debug)
+    {
+      console.log("Packet ID: " + packetIdFromClient);
+      console.log("Company name: " + companyNameFromClient);
+      console.log("Company account: " + toAccount);
+      console.log("Existing TX count in DB for the packet: " + txCount);
+      console.log("Current activity based on the count: " + activity);
+      console.log("Data after encryption " + dataToEncrypt);
+      console.log("Data after encryption " + encryptedDataToSave);
+    }
+  }
+
 })
 
 
