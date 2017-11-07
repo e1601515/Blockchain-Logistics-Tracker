@@ -32,26 +32,36 @@ app.locals.retrievedPackets="";
 //rendering html from ejs template and sending to client
 app.get('/', function (req, res)
 {
-  var checkIfBusy = setTimeout(function ()
+  var listExisting;
+  var sendResponseLoop, checkIfBusyLoop;
+  checkIfBusyLoop = setTimeout(function ()
   {
     if(databaseModule.isReserved()==false)
     {
-      databaseModule.listPacketID()
-      var isListFetched = setInterval(function ()
+      try
       {
-        var listExisting = databaseModule.returnPacketList();
-        if(listExisting!="")
-        {
-          console.log("List of packets in database sent as predictive text input: "+listExisting);
-          app.locals.suggestions=listExisting;
-          res.render('barcode2');
-          app.locals.messageToClient="";
-          clearInterval(isListFetched);
-        }
-      },25);
-      clearInterval(checkIfBusy);
+        databaseModule.listPacketID();
+        sendResponseLoop = setInterval(sendResponse,25);
+        clearInterval(checkIfBusyLoop);
+      }
+      catch(error)
+      {
+        console.log(error);
+      }
     }
   },500);
+  function sendResponse()
+  {
+    listExisting = databaseModule.returnPacketList();
+    if(listExisting!=null)
+    {
+      console.log("List of packets in database sent as predictive text input: "+listExisting);
+      app.locals.suggestions=listExisting;
+      res.render('barcode2');
+      app.locals.messageToClient="";
+      clearInterval(sendResponseLoop);
+    }
+  }
 })
 
 app.get('/getTx', function (req, res)
@@ -89,79 +99,111 @@ app.get('/getFromEthereum', function (req, res)
   }
 });
 
-app.get('/print', function (req, res)
-{
-  var entriesFromDB;
-  var stringFromEthereum,decryptedStrings2;
-  var decryptedStrings1 = "";
-  var decryptedStringsFinal = "";
-  var busyCheckForPrint = setInterval(function()
-  {
-    if(databaseModule.isReserved()==false)
-    {
-      databaseModule.loadFromDB('5551');
-      var entriesFound = setInterval(function()
-      {
-        entriesFromDB = databaseModule.returnTXEntries();
-        if(entriesFromDB!=null)
-        {
-          entriesFromDB = entriesFromDB.split(',');
-          var hashEntry;
-          for(var i=0;i<entriesFromDB.length;i+=1)
-          {
-            hashEntry=entriesFromDB[i].split(':');
-            if(hashEntry[0]!="" && hashEntry[1]!="" && hashEntry[0]!=null && hashEntry[1]!=null)
-            {
-              hashEntry[1]=hashEntry[1].replace("'","");
-              hashEntry[1]=hashEntry[1].replace("'","");
-              stringFromEthereum=ethereumModule.getFromEthereum(hashEntry[1]);
-              decryptedStrings1+=',"entry'+i+'":'+'{'+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string")+'"}';
-              //decryptedStrings+=";"+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string");
-              if(debug)
-              {
-                //console.log(hashEntry[1]);
-                //console.log("after adding "+decryptedStrings1);
-              }
-            }
-          }
-          var checkIfMoreFromEthereum = setInterval(function()
-          {
-            if(decryptedStrings1!=decryptedStrings2)
-            {
-              decryptedStrings2=decryptedStrings1;
-            }
-            else
-            {
-              decryptedStringsFinal=decryptedStrings1;
-              clearInterval(checkIfMoreFromEthereum);
-            }
-          },25)
-          clearInterval(entriesFound);
-        }
-      },25)
-      var printingResults = setInterval(function()
-      {
-        if(decryptedStringsFinal!="")
-        {
-          decryptedStringsFinal=decryptedStringsFinal.replace(',',"");
-          var newJSON = JSON.parse('{"packets":{'+decryptedStringsFinal+'}}')
-          //app.locals.retrievedPackets=decryptedStrings;
-          app.locals.retrievedPackets=JSON.stringify(newJSON);
-          res.json(newJSON);
-          //res.render('barcode2');
-          clearInterval(printingResults);
-        }
-      },25);
-      clearInterval(busyCheckForPrint);
-    }
-  },500);
-});
-
 //initializing body parser so we can fetch data from text box
 app.use(bodyParser.json() );
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.json());
 app.use(express.urlencoded());
+
+app.get('/print', function (req, res)
+{
+  //saving searchTerm from client UI
+  //var searchTerm = req.body.searchTerm;
+
+  //hard coded
+  var searchTerm="5541";
+
+  //initializing strings to hold packet data
+  var entriesFromDB;
+  var stringFromEthereum;
+  var decryptedStrings1 = "";
+  var decryptedStrings2;
+  var decryptedStringsFinal = "";
+
+  //loops for async
+  var searchEntriesLoop,checkIfMoreFromEthereumLoop,showResultsLoop;
+
+  var busyCheckForPrintLoop = setInterval(function()
+  {
+    if(databaseModule.isReserved()==false)
+    {
+      //loading from DB
+      databaseModule.loadFromDB(searchTerm);
+
+      //starting next loop
+      searchEntriesLoop = setInterval(searchEntries,25);
+      clearInterval(busyCheckForPrintLoop);
+    }
+  },500);
+  function searchEntries()
+  {
+    entriesFromDB = databaseModule.returnTXEntries();
+    //when loaded from DB >> retrieving and decrypting the packet data
+    if(entriesFromDB!=null)
+    {
+      entriesFromDB = entriesFromDB.split(',');
+      var hashEntry;
+
+      for(var i=0;i<entriesFromDB.length;i+=1)
+      {
+        hashEntry=entriesFromDB[i].split(':');
+
+        if(hashEntry[0]!="" && hashEntry[1]!="" && hashEntry[0]!=null && hashEntry[1]!=null)
+        {
+          hashEntry[1]=hashEntry[1].replace("'","");
+          hashEntry[1]=hashEntry[1].replace("'","");
+          //hashEntry[1] is the transaction hash and here we search the transaction and the data stored to it
+          stringFromEthereum=ethereumModule.getFromEthereum(hashEntry[1]);
+          decryptedStrings1+=',"entry'+i+'":'+'{'+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string")+'"}';
+
+          if(debug)
+          {
+            //console.log(hashEntry[1]);
+            //console.log("after adding "+decryptedStrings1);
+          }
+        }
+      }
+      checkIfMoreFromEthereumLoop = setInterval(checkIfMoreFromEthereum,25);
+      clearInterval(searchEntriesLoop);
+    }
+  }
+  function checkIfMoreFromEthereum()
+  {
+    if(decryptedStrings1!=decryptedStrings2)
+    {
+      decryptedStrings2=decryptedStrings1;
+    }
+    else
+    {
+      decryptedStringsFinal=decryptedStrings1;
+      showResultsLoop = setInterval(showResults,25);
+      clearInterval(checkIfMoreFromEthereumLoop);
+    }
+  }
+  function showResults()
+  {
+    if(decryptedStringsFinal!="")
+    {
+      try
+      {
+        decryptedStringsFinal=decryptedStringsFinal.replace(',',"");
+        var newJSON = JSON.parse('{"entries":{'+decryptedStringsFinal+'}}')
+        if(debug)
+          console.log(newJSON);
+        app.locals.retrievedPackets=JSON.stringify(newJSON);
+        res.json(newJSON);
+        //res.render('barcode2');
+        clearInterval(showResultsLoop);
+      }
+      catch (error)
+      {
+        console.log(error);
+        res.send("Something went wrong. Probably the data is in wrong format.   "+error);
+        clearInterval(showResultsLoop);
+      }
+    }
+  }
+});
 
 app.post('/', function (req, res)
 {
@@ -177,7 +219,8 @@ app.post('/', function (req, res)
   var longitude = -84.3789;
 
   //variables for the input data parameter
-  var txCount,toAccount,activity,addressJSON;
+  var txCount,toAccount,activity
+  var addressJSON = null;
 
   //strings of full packet data
   var dataToEncrypt;
@@ -205,6 +248,8 @@ app.post('/', function (req, res)
     }
     //long delay->less chance to conflict as it checks if the modules are busy only at the start
   },500);
+
+  //The functions are in the same order here as the order they are executed in.
 
   function getCountAndActivity()
   {
@@ -235,19 +280,27 @@ app.post('/', function (req, res)
     //asynchronous retrieval of additional info based on gps coord, such as street address
     geocoder.reverse({lat:latitude,lon: longitude}, function(err, res)
     {
-      addressJSON=JSON.stringify(res);
-      addressJSON=addressJSON.replace("[","");
-      addressJSON=addressJSON.replace("]","");
-
-      if(debug)
+      //sometimes returns null! try catching
+      try
       {
-        console.log("Information of client: "+addressJSON);
+        addressJSON=JSON.stringify(res);
+        addressJSON=addressJSON.replace("[","");
+        addressJSON=addressJSON.replace("]","");
+        encryptAndSendEthereumLoop = setInterval(encryptAndSendEthereum,50);
       }
 
+      catch(error)
+      {
+        initLocation();
+        if(debug)
+          console.log(error);
+      }
+
+      if(debug)
+        console.log("Information of client: "+addressJSON);
     });
 
     //location info is being retrieved. Starting third loop.
-    encryptAndSendEthereumLoop = setInterval(encryptAndSendEthereum,50);
   }
 
   function encryptAndSendEthereum()
