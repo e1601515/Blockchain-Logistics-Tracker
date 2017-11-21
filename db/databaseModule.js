@@ -129,7 +129,7 @@ var listPacketID = function()
   txdb.each("SELECT * FROM TX ORDER BY timestamp DESC", function(err, row) {
     if(row != null)
     {
-      if(!list.includes(";"+row.packetID+";") && row.packetID.length>2)
+      if(!list.includes(row.packetID) && row.packetID.length>2)
       list+=";"+row.packetID;
     }
   });

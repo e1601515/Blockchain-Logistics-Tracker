@@ -1,36 +1,82 @@
 var debug = true;
+
 //adding npm modules
 var express = require('express');
 var bodyParser = require('body-parser')
+var NodeGeocoder = require('node-geocoder');
+var https = require('https');
+var fs = require('fs');
+var path = require("path");
+
 //adding external .js file
 var ethereumModule = require('./ethereum/ethereumModule.js');
 var cryptoModule = require('./crypto/cryptoModule.js');
 var databaseModule = require('./db/databaseModule.js');
 var jsonModule = require('./json/jsonModule.js');
 var inputModule = require('./input/inputModule.js');
-var NodeGeocoder = require('node-geocoder');
-var geocoder = NodeGeocoder();
+
+
 //initializing and starting web server
 var app = express();
-var port = 8080;
+var appUnsecure = express();
+
+//initializing location and setting to finnish
+var geoOptions = {provider: 'google',language:'fi'};
+var geocoder = NodeGeocoder(geoOptions);
+
+var portUnsecure = 80;
+var port = 443;
+appUnsecure.set('view engine', 'ejs');
 app.set('view engine', 'ejs');
-app.listen(port, function() {
-  console.log('Webserver running in port '+port);
+app.use(express.static(path.join(__dirname, 'public')));
+
+var SSLprivateKey  = fs.readFileSync('./ssl/private.key', 'utf8');
+var certificate = fs.readFileSync('./ssl/certificate.crt', 'utf8');
+var credentials = {key: SSLprivateKey, cert: certificate};
+
+var httpsServer = https.createServer(credentials, app);
+
+appUnsecure.listen(portUnsecure, function()
+{
+  console.log('Webserver running in port '+portUnsecure);
   ethereumModule.connectEthereum();
 });
+
+httpsServer.listen(port);
+console.log('SSL webserver running in port '+port);
 
 //account
 //NEVER STORE THE PRIVATE KEY IN PUBLISHED SOURCE CODE!!!!
 var fromAccount = "0x15abD8B6b251Dac70B36C456BD880219080E153A";
 var privateKey = "";
 var cryptoPassword = "logistiikka";
-var txHash="";
+//var txHash="";
 
 app.locals.messageToClient="";
 app.locals.suggestions="";
 app.locals.retrievedPackets="";
+
 //rendering html from ejs template and sending to client
+
+//The simple GETs.
+appUnsecure.get('/', function (req, res)
+{
+  res.redirect('https://blockchainlogistics.tk/');
+})
+
 app.get('/', function (req, res)
+{
+  //this is the "main menu"
+  res.render('index');
+})
+
+app.get('/login', function (req, res)
+{
+  res.render('loginView2');
+})
+
+//Less simple GETs with predictions and message reset
+app.get('/add', function (req, res)
 {
   var listExisting;
   var sendResponseLoop, checkIfBusyLoop;
@@ -57,47 +103,47 @@ app.get('/', function (req, res)
     {
       console.log("List of packets in database sent as predictive text input: "+listExisting);
       app.locals.suggestions=listExisting;
-      res.render('barcode2');
+      res.render('addView3');
       app.locals.messageToClient="";
       clearInterval(sendResponseLoop);
     }
   }
 })
 
-app.get('/getTx', function (req, res)
+app.get('/search', function (req, res)
 {
-  var txHash=ethereumModule.getLatest();
-  if(txHash!=null&&txHash!="")
+  var listExisting;
+  var sendResponseLoop, checkIfBusyLoop;
+  checkIfBusyLoop = setTimeout(function ()
   {
-    res.send('Latest tx https://ropsten.etherscan.io/tx/'+txHash);
-  }
-  else
-  {
-    res.send('No tx yet during current session.');
-  }
-});
-app.get('/getFromEthereum', function (req, res)
-{
-  var txHash=ethereumModule.getLatest();
-  if(txHash!=null&&txHash!="")
-  {
-    var dataToDecrypt = ethereumModule.getFromEthereum(txHash);
-    var decryptedData = cryptoModule.decryptString(dataToDecrypt,cryptoPassword)
-    var timestampFromEthereum = ethereumModule.getTimestamp(txHash,"string");
-    if(debug)
+    if(databaseModule.isReserved()==false)
     {
-      console.log("searching for: " + txHash);
-      console.log("before decryption: " + dataToDecrypt);
-      console.log("after decryption: " + decryptedData);
+      try
+      {
+        databaseModule.listPacketID();
+        sendResponseLoop = setInterval(sendResponse,25);
+        clearInterval(checkIfBusyLoop);
+      }
+      catch(error)
+      {
+        console.log(error);
+      }
     }
-    res.send("Packet info fetched from Ethereum: " + decryptedData +"\nTime: "+timestampFromEthereum);
-    //res.render('barcode2');
-  }
-  else
+  },500);
+  function sendResponse()
   {
-    res.send('No tx yet during current session.');
+    listExisting = databaseModule.returnPacketList();
+    if(listExisting!=null)
+    {
+      console.log("List of packets in database sent as predictive text input: "+listExisting);
+      app.locals.suggestions=listExisting;
+      res.render('searchView2');
+      app.locals.retrievedPackets="";
+      clearInterval(sendResponseLoop);
+    }
   }
 });
+
 
 //initializing body parser so we can fetch data from text box
 app.use(bodyParser.json() );
@@ -105,13 +151,18 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.json());
 app.use(express.urlencoded());
 
-app.get('/print', function (req, res)
+//POST for HTTPS
+app.post('/search', function (req, res)
 {
   //saving searchTerm from client UI
-  //var searchTerm = req.body.searchTerm;
-
-  //hard coded
-  var searchTerm="5541";
+  try
+  {
+    var searchTerm = inputModule.sanitizeInput(req.body.searchTerm);
+  }
+  catch(e)
+  {
+    console.log("Could not sanitize "+e);
+  }
 
   //initializing strings to hold packet data
   var entriesFromDB;
@@ -128,11 +179,17 @@ app.get('/print', function (req, res)
     if(databaseModule.isReserved()==false)
     {
       //loading from DB
-      databaseModule.loadFromDB(searchTerm);
-
-      //starting next loop
-      searchEntriesLoop = setInterval(searchEntries,25);
-      clearInterval(busyCheckForPrintLoop);
+      try
+      {
+        databaseModule.loadFromDB(searchTerm);
+        searchEntriesLoop = setInterval(searchEntries,25);
+        //starting next loop
+        clearInterval(busyCheckForPrintLoop);
+      }
+      catch (e)
+      {
+        console.log(e);
+      }
     }
   },500);
   function searchEntries()
@@ -153,13 +210,26 @@ app.get('/print', function (req, res)
           hashEntry[1]=hashEntry[1].replace("'","");
           hashEntry[1]=hashEntry[1].replace("'","");
           //hashEntry[1] is the transaction hash and here we search the transaction and the data stored to it
-          stringFromEthereum=ethereumModule.getFromEthereum(hashEntry[1]);
-          decryptedStrings1+=',"entry'+i+'":'+'{'+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' +ethereumModule.getTimestamp(hashEntry[1],"string")+'"}';
-
+          var timestampTemp;
+          try
+          {
+            timestampTemp = ethereumModule.getTimestamp(hashEntry[1],"string");
+          }
+          catch (e)
+          {
+            timestampTemp = "No timestamp yet. Please try again after 1 minute.";
+          }
+          try{
+            stringFromEthereum = ethereumModule.getFromEthereum(hashEntry[1]);
+            decryptedStrings1+=',"entry'+i+'":'+'{'+cryptoModule.decryptString(stringFromEthereum,cryptoPassword)+ ', "timestamp":"' + timestampTemp +'", "txHash":"' +hashEntry[1]+'"}';
+          }
+          catch(e)
+          {
+            console.log("Retrieving data for TX "+hashEntry[1]+" was not succesful. \n"+e);
+          }
           if(debug)
           {
-            //console.log(hashEntry[1]);
-            //console.log("after adding "+decryptedStrings1);
+            console.log(i+" searched tx "+hashEntry[1]);
           }
         }
       }
@@ -187,12 +257,12 @@ app.get('/print', function (req, res)
       try
       {
         decryptedStringsFinal=decryptedStringsFinal.replace(',',"");
-        var newJSON = JSON.parse('{"entries":{'+decryptedStringsFinal+'}}')
+        var searchResult = '{"entries":{'+decryptedStringsFinal+'}}';
+        var resultsJSON = JSON.parse(searchResult);
         if(debug)
-          console.log(newJSON);
-        app.locals.retrievedPackets=JSON.stringify(newJSON);
-        res.json(newJSON);
-        //res.render('barcode2');
+          console.log(resultsJSON);
+        app.locals.retrievedPackets=searchResult; //JSON.stringify(resultsJSON);
+        res.redirect('/search');
         clearInterval(showResultsLoop);
       }
       catch (error)
@@ -205,18 +275,15 @@ app.get('/print', function (req, res)
   }
 });
 
-app.post('/', function (req, res)
+app.post('/add', function (req, res)
 {
   //no injection attacks here! sanitizing input
   //receiving input element values from users submission
   var packetIdFromClient=inputModule.sanitizeInput(req.body.packetID);
   var companyNameFromClient=inputModule.sanitizeInput(req.body.companyName);
-  //var longitude = inputModule.sanitizeInput(req.body.longitudeClient);
-  //var latitude = inputModule.sanitizeInput(req.body.latitudeClient);
-
-  //hard coded while waiting UI to be built further
-  var latitude = 33.7489;
-  var longitude = -84.3789;
+  var longitude = inputModule.sanitizeInput(req.body.longitudeClient);
+  var latitude = inputModule.sanitizeInput(req.body.latitudeClient);
+  var userNameFromClient = inputModule.sanitizeInput(req.body.userName);
 
   //variables for the input data parameter
   var txCount,toAccount,activity
@@ -270,12 +337,12 @@ app.post('/', function (req, res)
       }
 
       //we have count and activity, time to get location
-      initLocation();
+      getLocation();
       clearInterval(getCountAndActivityLoop);
     }
   }
 
-  function initLocation()
+  function getLocation()
   {
     //asynchronous retrieval of additional info based on gps coord, such as street address
     geocoder.reverse({lat:latitude,lon: longitude}, function(err, res)
@@ -286,12 +353,13 @@ app.post('/', function (req, res)
         addressJSON=JSON.stringify(res);
         addressJSON=addressJSON.replace("[","");
         addressJSON=addressJSON.replace("]","");
+        //location info is being retrieved. Starting third loop.
         encryptAndSendEthereumLoop = setInterval(encryptAndSendEthereum,50);
       }
 
       catch(error)
       {
-        initLocation();
+        getLocation();
         if(debug)
           console.log(error);
       }
@@ -299,15 +367,13 @@ app.post('/', function (req, res)
       if(debug)
         console.log("Information of client: "+addressJSON);
     });
-
-    //location info is being retrieved. Starting third loop.
   }
 
   function encryptAndSendEthereum()
   {
     if(addressJSON!=null)
     {
-      dataToEncrypt=inputModule.jsonifyString(packetIdFromClient,activity,companyNameFromClient,latitude,longitude,addressJSON);
+      dataToEncrypt=inputModule.jsonifyString(packetIdFromClient,activity,userNameFromClient,companyNameFromClient,latitude,longitude,addressJSON);
       encryptedDataToSave = cryptoModule.encryptString(dataToEncrypt,cryptoPassword);
 
       ethereumModule.saveTransaction(privateKey,fromAccount,toAccount,encryptedDataToSave,packetIdFromClient);
@@ -315,7 +381,7 @@ app.post('/', function (req, res)
       printDebugs();
 
       app.locals.messageToClient=messageToClient;
-      res.redirect('/');
+      res.redirect('/add');
       clearInterval(encryptAndSendEthereumLoop);
     }
   }
@@ -329,14 +395,52 @@ app.post('/', function (req, res)
       console.log("Company account: " + toAccount);
       console.log("Existing TX count in DB for the packet: " + txCount);
       console.log("Current activity based on the count: " + activity);
-      console.log("Data after encryption " + dataToEncrypt);
-      console.log("Data after encryption " + encryptedDataToSave);
+      console.log("Data BEFORE encryption " + dataToEncrypt);
+      console.log("Data AFTER encryption " + encryptedDataToSave);
     }
   }
 
 })
 
 
+
+//Debug GETs
+/*
+app.get('/getTx', function (req, res)
+{
+  var txHash=ethereumModule.getLatest();
+  if(txHash!=null&&txHash!="")
+  {
+    res.send('Latest tx https://ropsten.etherscan.io/tx/'+txHash);
+  }
+  else
+  {
+    res.send('No tx yet during current session.');
+  }
+});
+app.get('/getFromEthereum', function (req, res)
+{
+  var txHash=ethereumModule.getLatest();
+  if(txHash!=null&&txHash!="")
+  {
+    var dataToDecrypt = ethereumModule.getFromEthereum(txHash);
+    var decryptedData = cryptoModule.decryptString(dataToDecrypt,cryptoPassword)
+    var timestampFromEthereum = ethereumModule.getTimestamp(txHash,"string");
+    if(debug)
+    {
+      console.log("searching for: " + txHash);
+      console.log("before decryption: " + dataToDecrypt);
+      console.log("after decryption: " + decryptedData);
+    }
+    res.send("Packet info fetched from Ethereum: " + decryptedData +"\nTime: "+timestampFromEthereum);
+    //res.render('barcode2');
+  }
+  else
+  {
+    res.send('No tx yet during current session.');
+  }
+});
+*/
 
 //this is the command for geth CLI to start the rpc, unless done with parameters when starting geth
 //admin.startRPC("127.0.0.1", 8545, "*", "web3,net,eth")

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Blockchain Logistics Tracker</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+  * {
+    box-sizing: border-box;
+    -webkit-box-sizing
+    -moz-box-sizing: border-box;
+  }
+
+  html
+  {
+    width: 100%;
+  }
+
+  body{
+    width:100%;
+    text-align:center;
+  }
+
+  .container
+  {
+    width: 100%;
+    text-align:center;
+  }
+
+  .btn{
+    font-size:25px;
+    margin-bottom:12px;
+    border-radius: 5px;
+    padding:7px 12px;
+  }
+
+  .input{
+    width:75%;
+    height: 50px;
+    font-size:30px;
+  }
+
+  h2{
+    font-size:55px;
+  }
+
+  .nav>li>a:hover {
+    text-decoration: none;
+    background-color: #fff;
+    opacity: .5;
+  }
+
+  .input:focus {
+    outline: #4CAF50 solid 1px;
+  }
+
+  .clientMessage{
+    background-color: #e3f2fd;
+  }
+}
+
+</style>
+</head>
+<body>
+
+
+  <nav class="navbar navbar-light menu" style="background-color: #e3f2fd;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Blockchain Logistics Tracker</a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li><a href="/">Main menu</a></li>
+        <li><a href="/search">Search</a></li>
+      </ul>
+    </div>
+  </nav>
+
+
+  <div class="container main-body">
+    <h2 id="clientMessage" class="clientMessage"><%=messageToClient%></h2>
+    <h2>Packet ID</h2>
+    <form action="/add" method="post" id="addForm">
+      <div class="form-group ">
+        <input id="packetID" name="packetID" list="predictive" type="search" class="input"  placeholder="" autofocus>
+        <datalist id="predictive"></datalist>
+        <button type="button" class="btn btn-primary" onclick=getLocation() >Submit</button>
+        <input  type="hidden" name="userName" id="user" value="">
+        <input name="companyName" type="hidden" id="company" value="">
+        <input name="latitudeClient"  id="lat" type="hidden">
+        <input name="longitudeClient"  id="lon" type="hidden">
+      </div>
+      <button type="submit" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" id="submitButton" disabled=true>Loading location...</button>
+    </form>
+    <div class="table-responsive">
+      <table id="id01" class="table"></table>
+    </div>
+  </div>
+  <script>
+  var suggestions="<%=suggestions%>";
+  suggestions=suggestions.split(';');
+
+  var submitButton = document.getElementById("submitButton");
+
+  var autofillCompanyname=localStorage.getItem("companyName");
+  var autofillUsername=localStorage.getItem("userName");
+  if(autofillUsername!=null&&autofillCompanyname!=null)
+  {
+    document.getElementById("user").value=autofillUsername;
+    document.getElementById("company").value=autofillCompanyname;
+  }
+
+  for(var suggestIndex=0;suggestIndex<suggestions.length;suggestIndex+=1)
+  {
+    if(suggestions[suggestIndex]!=null&&suggestions[suggestIndex]!="")
+    {
+      document.getElementById("predictive").innerHTML+="<option value="+suggestions[suggestIndex]+">";
+    }
+  }
+
+  /*
+  function getName()
+  {
+    document.getElementById("user").value =document.getElementById("userInput").value;
+    document.getElementById("company").value =document.getElementById("companyInput").value;
+    localStorage.setItem("userName",document.getElementById("userInput").value);
+    localStorage.setItem("companyName",document.getElementById("companyInput").value);
+  }
+  */
+
+  function getLocation()
+  {
+    //getName(); log in moved to separate html
+    submitButton.style.color="blue";
+    if (navigator.geolocation && document.getElementById("packetID").value!="")
+    {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    }
+    else
+    {
+      //innerHTML = "Geolocation is not supported by this browser.";
+      alert("Location not supported or invalid Packet ID");
+      location.reload();
+    }
+  }
+
+  function showPosition(position) {
+    var showPositionLoop = setInterval(function()
+    {
+      if(position.coords.latitude.toFixed!=null && position.coords.longitude!=null)
+      {
+        document.getElementById("lat").value =position.coords.latitude;
+        document.getElementById("lon").value =position.coords.longitude;
+        clearInterval(showPositionLoop);
+        submitButton.disabled=false;
+        submitButton.click();
+      }
+    },100);
+  }
+
+  </script>
+</body>
+</html>

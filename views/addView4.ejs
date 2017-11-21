@@ -1,0 +1,4270 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Packet</title>
+  <meta charset="utf-8">
+  <!-- < meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.3.js"></script>
+  <link href="https://www.cc.puv.fi/~e1401168/ekasivu/barcode2/css/style.css" rel="stylesheet">
+  <style>
+  * {
+    box-sizing: border-box;
+   -webkit-box-sizing
+   -moz-box-sizing: border-box;
+
+}
+  body{
+    margin:50px 0;
+    padding:0px;
+    text-align:center;
+
+  }
+  .btn{
+	font-size:25px;
+	margin-bottom:12px;
+	border-radius: 5px;
+	padding:7px 5px;
+
+  }
+    .glyphicon {
+      font-size: 40px;
+	    float:right;
+}
+  .input{
+    width:230px;
+    height: 50px;
+    font-size:30px;
+
+  }
+    .input:focus {
+    outline: #4CAF50 solid 1px;
+}
+  h2{
+    margin-top: 40px;
+    margin-right:93px;
+    font-size:50px;
+
+  }
+@media only screen and (orientation: landscape) {
+ .btn{
+    font-size:40px;
+    margin-bottom:23px;
+    border-radius: 5px;
+	padding:8px 8px;
+
+  }
+    h2{
+    margin-top: 40px;
+    font-size:65px;
+
+  }
+  body{
+    margin:50px 0;
+    padding:0px;
+    text-align:center;
+
+  }
+  .input{
+    width:75%;
+	height: 75px;
+	font-size:45px;
+
+  }
+    .input:focus {
+    outline: #4CAF50 solid 1px;
+}
+    .koko{
+      margin-top:-44px;
+
+  }
+    .glyphicon {
+      font-size: 40px;
+	    float:right;
+}
+#clientMessage{
+margin-right:200px;
+}
+}
+    </style>
+
+</head>
+<body>
+
+<div class="koko">
+<nav class="navbar navbar-light menu" style="background-color: #e3f2fd;">
+      <a href="/"><span class="glyphicon glyphicon-home"></span></a>
+
+    <div class="container-fluid" >
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Blockchain Logistics Tracker</a>
+		<div class="blurred" id="demo" style="display:none">
+
+        <div class="container" id="QR-Code">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="navbar-form navbar-left" >
+
+                    </div>
+                    <div class="navbar-form navbar-right">
+                        <select style="display:none" class="form-control" id="camera-select"><option value="91574bf40aa5d3ceb5fcd59b95d56c4636dbd3c4382e51de6a99d7f764fb9d4b">Integrated Webcam (0bda:5650)</option><option value="a7c5c33e7073735017901269334438e4be1dd46738972a073f1dc4f2b6996201">FaceCam 1320 (0458:707b)</option></select>
+
+                    </div>
+                </div>
+                <div class="panel-body text-center" >
+                     <div class="col-md-6" >  <!--Barcode made by andrastoth -->
+                        <div style="display:none" class="well" style="position: relative;display: inline-block;">
+                            <canvas style="display:none" width="320" height="240" id="webcodecam-canvas"></canvas>
+                            <div class="scanner-laser laser-rightBottom" style="opacity: 0.5;"></div>
+                            <div class="scanner-laser laser-rightTop" style="opacity: 0.5;"></div>
+                            <div class="scanner-laser laser-leftBottom" style="opacity: 0.5;"></div>
+                            <div class="scanner-laser laser-leftTop" style="opacity: 0.5;"></div>
+                        </div>
+                        <div style="display:none" class="well" style="width: 100%;">
+                            <label id="zoom-value" width="100">Zoom: 2</label>
+                            <input id="zoom" onchange="Page.changeZoom();" type="range" min="10" max="30" value="20">
+                            <label id="brightness-value" width="100">Brightness: 0</label>
+                            <input id="brightness" onchange="Page.changeBrightness();" type="range" min="0" max="128" value="0">
+                            <label id="contrast-value" width="100">Contrast: 0</label>
+                            <input id="contrast" onchange="Page.changeContrast();" type="range" min="0" max="64" value="0">
+                            <label id="threshold-value" width="100">Threshold: 0</label>
+                            <input id="threshold" onchange="Page.changeThreshold();" type="range" min="0" max="512" value="0">
+                            <label id="sharpness-value" width="100">Sharpness: off</label>
+                            <input id="sharpness" onchange="Page.changeSharpness();" type="checkbox">
+                            <label id="grayscale-value" width="100">grayscale: off</label>
+                            <input id="grayscale" onchange="Page.changeGrayscale();" type="checkbox">
+                            <br>
+                            <label id="flipVertical-value" width="100">Flip Vertical: off</label>
+                            <input id="flipVertical" onchange="Page.changeVertical();" type="checkbox">
+                            <label id="flipHorizontal-value" width="100">Flip Horizontal: off</label>
+                            <input id="flipHorizontal" onchange="Page.changeHorizontal();" type="checkbox">
+                        </div>
+                    </div >
+                    <div class="col-md-6">
+                        <div class="thumbnail" id="result">
+                            <div class="well" style="overflow: hidden;">
+                                <img style="display:none" width="320" height="240" id="scanned-img" src="">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+
+
+
+            </div>
+        </div>
+    </div></div>
+      </div> </div>
+	      <div id="clientMessage" class="clientMessage"></div>
+  <h2>Packet ID</h2>
+    <form action="/add" method="post" id="addForm">
+    <div class="form-group ">
+	<label for="name"></label>
+      <input type="search" id="packetID" name="packetID"  list="predictive" class="input"   required autocomplete="packetID" placeholder="" autofocus>
+	          <datalist id="predictive"></datalist>
+
+	   <button type="button" class="btn btn-primary" onclick=getLocation()>Submit</button>
+
+	   			            <!-- <p id="scanned-QR" ></p> -->
+
+	           <input  type="hidden" name="userName" id="user" value="">
+			                           <div class="form-group">
+                            <input style="display:none" id="image-url" type="text" class="form-control" placeholder="Image url">
+                            <button  title="Decode Image" class="btn btn-default btn-sm" id="decode-img" type="button" data-toggle="tooltip"><span class="glyphicon glyphicon-barcode"></span></button>
+                            <button style="display:none" title="Image shoot" class="btn btn-info btn-sm disabled" id="grab-img" type="button" data-toggle="tooltip"><span class="glyphicon glyphicon-picture"></span></button>
+                            <button style="display:none"  title="Play" class="btn btn-success btn-sm" id="play" type="button" data-toggle="tooltip"><span class="glyphicon glyphicon-play"></span></button>
+                            <button style="display:none" title="Pause" class="btn btn-warning btn-sm" id="pause" type="button" data-toggle="tooltip"><span class="glyphicon glyphicon-pause"></span></button>
+                            <button style="display:none" title="Stop streams" class="btn btn-danger btn-sm" id="stop" type="button" data-toggle="tooltip"><span class="glyphicon glyphicon-stop" ></span></button>
+                         </div>
+        <input name="companyName" type="hidden" id="company" value="">
+        <input name="latitudeClient"  id="lat" type="hidden">
+        <input name="longitudeClient"  id="lon" type="hidden">
+    </div>
+	      <button type="submit" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" id="submitButton" disabled=true>Loading location...</button>
+  </form>
+      <div id="clientMessage" class="clientMessage"><%=messageToClient%></div>
+	</div>
+<script>
+  var suggestions="<%=suggestions%>";
+  suggestions=suggestions.split(';');
+  //var retrievedPackets='';
+  var submitButton = document.getElementById("submitButton");
+
+  var autofillCompanyname=localStorage.getItem("companyName");
+  var autofillUsername=localStorage.getItem("userName");
+  if(autofillUsername!=null&&autofillCompanyname!=null)
+  {
+    document.getElementById("user").value=autofillUsername;
+    document.getElementById("company").value=autofillCompanyname;
+  }
+
+  for(var suggestIndex=0;suggestIndex<suggestions.length;suggestIndex+=1)
+  {
+    if(suggestions[suggestIndex]!=null&&suggestions[suggestIndex]!="")
+    {
+      document.getElementById("predictive").innerHTML+="<option value="+suggestions[suggestIndex]+">";
+    }
+  }
+
+  /*
+  function getName()
+  {
+    document.getElementById("user").value =document.getElementById("userInput").value;
+    document.getElementById("company").value =document.getElementById("companyInput").value;
+    localStorage.setItem("userName",document.getElementById("userInput").value);
+    localStorage.setItem("companyName",document.getElementById("companyInput").value);
+  }
+  */
+
+  function getLocation()
+  {
+    //getName(); log in moved to separate html
+    submitButton.style.color="blue";
+    if (navigator.geolocation && document.getElementById("packetID").value!="")
+    {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    }
+    else
+    {
+      //innerHTML = "Geolocation is not supported by this browser.";
+      alert("Location not supported or invalid Packet ID");
+      location.reload();
+    }
+  }
+
+  function showPosition(position) {
+    var showPositionLoop = setInterval(function()
+    {
+      if(position.coords.latitude.toFixed!=null && position.coords.longitude!=null)
+      {
+        document.getElementById("lat").value =position.coords.latitude;
+        document.getElementById("lon").value =position.coords.longitude;
+        clearInterval(showPositionLoop);
+        submitButton.disabled=false;
+        submitButton.click();
+      }
+    },100);
+  }
+  // tän jälkeen muitten javascript
+
+  /*!
+ * WebCodeCamJQuery 2.1.0 javascript Bar-Qr code decoder
+ * Author: TĆ³th AndrĆ�s
+ * Web: http://atandrastoth.co.uk
+ * email: atandrastoth@gmail.com
+ * Licensed under the MIT license
+ */
+(function(undefined) {
+    var scannerLaser = $(".scanner-laser"),
+        imageUrl = $("#image-url"),
+        decodeLocal = $("#decode-img"),
+        play = $("#play"),
+        scannedImg = $("#scanned-img"),
+        scannedQR = $("#scanned-QR"),
+        grabImg = $("#grab-img"),
+        pause = $("#pause"),
+        stop = $("#stop"),
+        contrast = $("#contrast"),
+        contrastValue = $("#contrast-value"),
+        zoom = $("#zoom"),
+        zoomValue = $("#zoom-value"),
+        brightness = $("#brightness"),
+        brightnessValue = $("#brightness-value"),
+        threshold = $("#threshold"),
+        thresholdValue = $("#threshold-value"),
+        sharpness = $("#sharpness"),
+        sharpnessValue = $("#sharpness-value"),
+        grayscale = $("#grayscale"),
+        grayscaleValue = $("#grayscale-value"),
+        flipVertical = $("#flipVertical"),
+        flipVerticalValue = $("#flipVertical-value"),
+        flipHorizontal = $("#flipHorizontal"),
+        flipHorizontalValue = $("#flipHorizontal-value");
+    var args = {
+        autoBrightnessValue: 100,
+        resultFunction: function(res) {
+            [].forEach.call(scannerLaser, function(el) {
+                $(el).fadeOut(300, function() {
+                    $(el).fadeIn(300);
+                });
+            });
+            scannedImg.attr("src", res.imgData);
+            scannedQR.text(res.format + ": " + res.code);
+        },
+        getDevicesError: function(error) {
+            var p, message = "Error detected with the following parameters:\n";
+            for (p in error) {
+                message += (p + ": " + error[p] + "\n");
+            }
+            alert(message);
+        },
+        getUserMediaError: function(error) {
+            var p, message = "Error detected with the following parameters:\n";
+            for (p in error) {
+                message += (p + ": " + error[p] + "\n");
+            }
+            alert(message);
+        },
+        cameraError: function(error) {
+            var p, message = "Error detected with the following parameters:\n";
+            if (error.name == "NotSupportedError") {
+                var ans = confirm("Your browser does not support getUserMedia via HTTP!\n(see: https://goo.gl/Y0ZkNV).\n You want to see github demo page in a new window?");
+                if (ans) {
+                    window.open("https://andrastoth.github.io/webcodecamjs/");
+                }
+            } else {
+                for (p in error) {
+                    message += p + ": " + error[p] + "\n";
+                }
+                alert(message);
+            }
+        },
+        cameraSuccess: function() {
+            grabImg.removeClass("disabled");
+        }
+    };
+    var decoder = $("#webcodecam-canvas").WebCodeCamJQuery(args).data().plugin_WebCodeCamJQuery;
+    decoder.buildSelectMenu("#camera-select", "environment|back").init();
+    decodeLocal.on("click", function() {
+        Page.decodeLocalImage();
+    });
+    play.on("click", function() {
+        scannedQR.text("Scanning ...");
+        grabImg.removeClass("disabled");
+        decoder.play();
+    });
+    grabImg.on("click", function() {
+        scannedImg.attr("src", decoder.getLastImageSrc());
+    });
+    pause.on("click", function(event) {
+        scannedQR.text("Paused");
+        decoder.pause();
+    });
+    stop.on("click", function(event) {
+        grabImg.addClass("disabled");
+        scannedQR.text("Stopped");
+        decoder.stop();
+    });
+    Page.changeZoom = function(a) {
+        if (decoder.isInitialized()) {
+            var value = typeof a !== "undefined" ? parseFloat(a.toPrecision(2)) : zoom.val() / 10;
+            zoomValue.text(zoomValue.text().split(":")[0] + ": " + value.toString());
+            decoder.options.zoom = value;
+            if (typeof a != "undefined") {
+                zoom.val(a * 10);
+            }
+        }
+    };
+    Page.changeContrast = function() {
+        if (decoder.isInitialized()) {
+            var value = contrast.val();
+            contrastValue.text(contrastValue.text().split(":")[0] + ": " + value.toString());
+            decoder.options.contrast = parseFloat(value);
+        }
+    };
+    Page.changeBrightness = function() {
+        if (decoder.isInitialized()) {
+            var value = brightness.val();
+            brightnessValue.text(brightnessValue.text().split(":")[0] + ": " + value.toString());
+            decoder.options.brightness = parseFloat(value);
+        }
+    };
+    Page.changeThreshold = function() {
+        if (decoder.isInitialized()) {
+            var value = threshold.val();
+            thresholdValue.text(thresholdValue.text().split(":")[0] + ": " + value.toString());
+            decoder.options.threshold = parseFloat(value);
+        }
+    };
+    Page.changeSharpness = function() {
+        if (decoder.isInitialized()) {
+            var value = sharpness.prop("checked");
+            if (value) {
+                sharpnessValue.text(sharpnessValue.text().split(":")[0] + ": on");
+                decoder.options.sharpness = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+            } else {
+                sharpnessValue.text(sharpnessValue.text().split(":")[0] + ": off");
+                decoder.options.sharpness = [];
+            }
+        }
+    };
+    Page.changeGrayscale = function() {
+        if (decoder.isInitialized()) {
+            var value = grayscale.prop("checked");
+            if (value) {
+                grayscaleValue.text(grayscaleValue.text().split(":")[0] + ": on");
+                decoder.options.grayScale = true;
+            } else {
+                grayscaleValue.text(grayscaleValue.text().split(":")[0] + ": off");
+                decoder.options.grayScale = false;
+            }
+        }
+    };
+    Page.changeVertical = function() {
+        if (decoder.isInitialized()) {
+            var value = flipVertical.prop("checked");
+            if (value) {
+                flipVerticalValue.text(flipVerticalValue.text().split(":")[0] + ": on");
+                decoder.options.flipVertical = value;
+            } else {
+                flipVerticalValue.text(flipVerticalValue.text().split(":")[0] + ": off");
+                decoder.options.flipVertical = value;
+            }
+        }
+    };
+    Page.changeHorizontal = function() {
+        if (decoder.isInitialized()) {
+            var value = flipHorizontal.prop("checked");
+            if (value) {
+                flipHorizontalValue.text(flipHorizontalValue.text().split(":")[0] + ": on");
+                decoder.options.flipHorizontal = value;
+            } else {
+                flipHorizontalValue.text(flipHorizontalValue.text().split(":")[0] + ": off");
+                decoder.options.flipHorizontal = value;
+            }
+        }
+    };
+    Page.decodeLocalImage = function() {
+        if (decoder.isInitialized()) {
+            decoder.decodeLocalImage(imageUrl.val());
+        }
+        imageUrl.val(null);
+    };
+    var getZomm = setInterval(function() {
+        var a;
+        try {
+            a = decoder.getOptimalZoom();
+        } catch (e) {
+            a = 0;
+        }
+        if (!!a && a !== 0) {
+            Page.changeZoom(a);
+            clearInterval(getZomm);
+        }
+    }, 500);
+    $("#camera-select").on("change", function() {
+        if (decoder.isInitialized()) {
+            decoder.stop().play();
+        }
+    });
+}).call(window.Page = window.Page || {});
+
+/* --------------------------------------------------
+Javascript Only Barcode_Reader (BarcodeReader) V1.6 by Eddie Larsson <https://github.com/EddieLa/BarcodeReader>
+
+This software is provided under the MIT license, http://opensource.org/licenses/MIT.
+All use of this software must include this
+text, including the reference to the creator of the original source code. The
+originator accepts no responsibility of any kind pertaining to
+use of this software.
+
+Copyright (c) 2013 Eddie Larsson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+------------------------ */
+function Rotate(data, width, height, rotation) {
+    var newData = [];
+    var x, y;
+    switch (rotation) {
+        case 90:
+            for (x = 0; x < width * 4; x += 4) {
+                for (y = width * 4 * (height - 1); y >= 0; y -= width * 4) {
+                    newData.push(data[x + y]);
+                    newData.push(data[x + y + 1]);
+                    newData.push(data[x + y + 2]);
+                    newData.push(data[x + y + 3]);
+                }
+            }
+            break;
+        case -90:
+            for (x = width * 4 - 4; x >= 0; x -= 4) {
+                for (y = 0; y < data.length; y += width * 4) {
+                    newData.push(data[x + y]);
+                    newData.push(data[x + y + 1]);
+                    newData.push(data[x + y + 2]);
+                    newData.push(data[x + y + 3]);
+                }
+            }
+            break;
+        case 180:
+            for (y = width * 4 * (height - 1); y >= 0; y -= width * 4) {
+                for (x = width * 4 - 4; x >= 0; x -= 4) {
+                    newData.push(data[x + y]);
+                    newData.push(data[x + y + 1]);
+                    newData.push(data[x + y + 2]);
+                    newData.push(data[x + y + 3]);
+                }
+            }
+    }
+    return new Uint8ClampedArray(newData);
+}
+
+function BoxFilter(data, width, radius) {
+    var elements = [];
+    var sum = [];
+    var val;
+    var x, y, i;
+    for (x = 0; x < width; x++) {
+        elements.push([]);
+        sum.push(0);
+        for (y = 0; y < (radius + 1) * width; y += width) {
+            elements[elements.length - 1].push(data[x + y]);
+            sum[sum.length - 1] = sum[sum.length - 1] + data[x + y];
+        }
+    }
+    var newData = [];
+    for (y = 0; y < data.length; y += width) {
+        for (x = 0; x < width; x++) {
+            var newVal = 0;
+            var length = 0;
+            for (i = x; i >= 0; i--) {
+                newVal += sum[i];
+                length++;
+                if (length === radius + 1) break;
+            }
+            var tempLength = 0;
+            for (i = x + 1; i < width; i++) {
+                newVal += sum[i];
+                length++;
+                tempLength++;
+                if (tempLength === radius) break;
+            }
+            length *= elements[0].length;
+            newVal /= length;
+            newData.push(newVal);
+        }
+        if (y - radius * width >= 0) {
+            for (i = 0; i < elements.length; i++) {
+                val = elements[i].shift();
+                sum[i] = sum[i] - val;
+            }
+        }
+        if (y + (radius + 1) * width < data.length) {
+            for (i = 0; i < elements.length; i++) {
+                val = data[i + y + (radius + 1) * width];
+                elements[i].push(val);
+                sum[i] = sum[i] + val;
+            }
+        }
+    }
+    return newData;
+}
+
+function Scale(data, width, height) {
+    var newData = [];
+    var x, y;
+    for (y = 0; y < data.length; y += width * 8) {
+        for (x = 0; x < width * 4; x += 8) {
+            var r = (data[y + x] + data[y + x + 4] + data[y + width * 4 + x] + data[y + width * 4 + x + 4]) / 4;
+            newData.push(r);
+            var g = (data[y + x + 1] + data[y + x + 4 + 1] + data[y + width * 4 + x + 1] + data[y + width * 4 + x + 4 + 1]) / 4;
+            newData.push(g);
+            var b = (data[y + x + 2] + data[y + x + 4 + 2] + data[y + width * 4 + x + 2] + data[y + width * 4 + x + 4 + 2]) / 4;
+            newData.push(b);
+            newData.push(255);
+        }
+    }
+    return new Uint8ClampedArray(newData);
+}
+
+function IntensityGradient(data, width) {
+    var newData = [];
+    var max = Number.MIN_VALUE;
+    var min = Number.MAX_VALUE;
+    var x, y, i;
+    for (y = 0; y < data.length; y += width * 4) {
+        for (x = 0; x < width * 4; x += 4) {
+            var horizontalDiff = 0;
+            var verticalDiff = 0;
+            for (i = 1; i < 2; i++) {
+                if (x + i * 4 < width * 4) {
+                    horizontalDiff = horizontalDiff + Math.abs(data[y + x] - data[y + x + i * 4]);
+                }
+                if (y + width * 4 * i < data.length) {
+                    verticalDiff += verticalDiff + Math.abs(data[y + x] - data[y + x + width * 4 * i]);
+                }
+            }
+            var diff = horizontalDiff - verticalDiff;
+            max = diff > max ? diff : max;
+            min = diff < min ? diff : min;
+            newData.push(diff);
+        }
+    }
+    if (min < 0) {
+        for (i = 0; i < newData.length; i++) {
+            newData[i] = newData[i] - min;
+        }
+        min = 0;
+    }
+    return newData;
+}
+
+function greyScale(data) {
+    var i;
+    for (i = 0; i < data.length; i += 4) {
+        var max = 0;
+        var min = 255;
+        max = data[i] > max ? data[i] : max;
+        max = data[i + 1] > max ? data[i + 1] : max;
+        max = data[i + 2] > max ? data[i + 2] : max;
+        min = data[i] < min ? data[i] : min;
+        min = data[i + 1] < min ? data[i + 1] : min;
+        min = data[i + 2] < min ? data[i + 2] : min;
+        data[i] = data[i + 1] = data[i + 2] = (max + min) / 2;
+    }
+}
+
+function histogram(data) {
+    var i;
+    var hist = [];
+    for (i = 0; i < 256; i++) {
+        hist[i] = 0;
+    }
+    for (i = 0; i < data.length; i += 4) {
+        hist[data[i]] = hist[data[i]] + 1;
+    }
+    return hist;
+}
+
+function otsu(histogram, total) {
+    var i;
+    var sum = 0;
+    for (i = 1; i < histogram.length; ++i) sum += i * histogram[i];
+    var sumB = 0;
+    var wB = 0;
+    var wF = 0;
+    var mB;
+    var mF;
+    var max = 0.0;
+    var between = 0.0;
+    var threshold1 = 0.0;
+    var threshold2 = 0.0;
+    for (i = 0; i < histogram.length; ++i) {
+        wB += histogram[i];
+        if (wB === 0) continue;
+        wF = total - wB;
+        if (wF === 0) break;
+        sumB += i * histogram[i];
+        mB = sumB / wB;
+        mF = (sum - sumB) / wF;
+        between = wB * wF * Math.pow(mB - mF, 2);
+        if (between >= max) {
+            threshold1 = i;
+            if (between > max) {
+                threshold2 = i;
+            }
+            max = between;
+        }
+    }
+    return (threshold1 + threshold2) / 2.0;
+}
+
+function CreateImageData() {
+    Image.data = new Uint8ClampedArray(Image.width * Image.height * 4);
+    var Converter;
+    var x, y;
+    for (y = 0; y < Image.height; y++) {
+        for (x = 0; x < Image.width; x++) {
+            Converter = y * 4 * Image.width;
+            Image.data[Converter + x * 4] = Image.table[x][y][0];
+            Image.data[Converter + x * 4 + 1] = Image.table[x][y][1];
+            Image.data[Converter + x * 4 + 2] = Image.table[x][y][2];
+            Image.data[Converter + x * 4 + 3] = Image.table[x][y][3];
+        }
+    }
+}
+
+function CreateScanImageData() {
+    ScanImage.data = new Uint8ClampedArray(ScanImage.width * ScanImage.height * 4);
+    var Converter;
+    var x, y;
+    for (y = 0; y < ScanImage.height; y++) {
+        for (x = 0; x < ScanImage.width; x++) {
+            Converter = y * 4 * ScanImage.width;
+            ScanImage.data[Converter + x * 4] = ScanImage.table[x][y][0];
+            ScanImage.data[Converter + x * 4 + 1] = ScanImage.table[x][y][1];
+            ScanImage.data[Converter + x * 4 + 2] = ScanImage.table[x][y][2];
+            ScanImage.data[Converter + x * 4 + 3] = ScanImage.table[x][y][3];
+        }
+    }
+}
+
+function CreateTable() {
+    Image.table = [];
+    var tempArray = [];
+    var i, j;
+    for (i = 0; i < Image.width * 4; i += 4) {
+        tempArray = [];
+        for (j = i; j < Image.data.length; j += Image.width * 4) {
+            tempArray.push([Image.data[j], Image.data[j + 1], Image.data[j + 2], Image.data[j + 3]]);
+        }
+        Image.table.push(tempArray);
+    }
+}
+
+function CreateScanTable() {
+    ScanImage.table = [];
+    var tempArray = [];
+    var i, j;
+    for (i = 0; i < ScanImage.width * 4; i += 4) {
+        tempArray = [];
+        for (j = i; j < ScanImage.data.length; j += ScanImage.width * 4) {
+            tempArray.push([ScanImage.data[j], ScanImage.data[j + 1], ScanImage.data[j + 2], ScanImage.data[j + 3]]);
+        }
+        ScanImage.table.push(tempArray);
+    }
+}
+
+function EnlargeTable(h, w) {
+    var TempArray = [];
+    var x, y, i;
+    for (x = 0; x < Image.width; x++) {
+        TempArray = [];
+        for (y = 0; y < Image.height; y++) {
+            for (i = 0; i < h; i++) {
+                TempArray.push(Image.table[x][y]);
+            }
+        }
+        Image.table[x] = TempArray.slice();
+    }
+    TempArray = Image.table.slice();
+    for (x = 0; x < Image.width; x++) {
+        for (i = 0; i < w; i++) {
+            Image.table[x * w + i] = TempArray[x].slice();
+        }
+    }
+    Image.width = Image.table.length;
+    Image.height = Image.table[0].length;
+    CreateImageData();
+}
+
+function ScaleHeight(scale) {
+    var tempArray = [];
+    var avrgRed = 0;
+    var avrgGreen = 0;
+    var avrgBlue = 0;
+    var i, j, k;
+    for (i = 0; i < Image.height - scale; i += scale) {
+        for (j = 0; j < Image.width; j++) {
+            avrgRed = 0;
+            avrgGreen = 0;
+            avrgBlue = 0;
+            for (k = i; k < i + scale; k++) {
+                avrgRed += Image.table[j][k][0];
+                avrgGreen += Image.table[j][k][1];
+                avrgBlue += Image.table[j][k][2];
+            }
+            tempArray.push(avrgRed / scale);
+            tempArray.push(avrgGreen / scale);
+            tempArray.push(avrgBlue / scale);
+            tempArray.push(255);
+        }
+    }
+    return new Uint8ClampedArray(tempArray);
+}
+
+function Intersects(rectOne, rectTwo) {
+    return (rectOne[0][0] <= rectTwo[0][1] && rectTwo[0][0] <= rectOne[0][1] && rectOne[1][0] <= rectTwo[1][1] && rectTwo[1][0] <= rectOne[1][1]);
+}
+
+function maxLocalization(max, maxPos, data) {
+    var originalMax = max;
+    var rects = [];
+    var x, y, i;
+    do {
+        var startX = maxPos % Image.width;
+        var startY = (maxPos - startX) / Image.width;
+        var minY = 0;
+        var maxY = Image.height;
+        var minX = 0;
+        var maxX = Image.width - 1;
+        for (y = startY; y < Image.height - 1; y++) {
+            if (Image.table[startX][y + 1][0] === 0) {
+                maxY = y;
+                break;
+            }
+        }
+        for (y = startY; y > 0; y--) {
+            if (Image.table[startX][y - 1][0] === 0) {
+                minY = y;
+                break;
+            }
+        }
+        for (x = startX; x < Image.width - 1; x++) {
+            if (Image.table[x + 1][startY][0] === 0) {
+                maxX = x;
+                break;
+            }
+        }
+        for (x = startX; x > 0; x--) {
+            if (Image.table[x - 1][startY][0] === 0) {
+                minX = x;
+                break;
+            }
+        }
+        for (y = minY * Image.width; y <= maxY * Image.width; y += Image.width) {
+            for (x = minX; x <= maxX; x++) {
+                data[y + x] = 0;
+            }
+        }
+        var newRect = [
+            [minX, maxX],
+            [minY, maxY]
+        ];
+        for (i = 0; i < rects.length; i++) {
+            if (Intersects(newRect, rects[i])) {
+                if (rects[i][0][1] - rects[i][0][0] > newRect[0][1] - newRect[0][0]) {
+                    rects[i][0][0] = rects[i][0][0] < newRect[0][0] ? rects[i][0][0] : newRect[0][0];
+                    rects[i][0][1] = rects[i][0][1] > newRect[0][1] ? rects[i][0][1] : newRect[0][1];
+                    newRect = [];
+                    break;
+                } else {
+                    rects[i][0][0] = rects[i][0][0] < newRect[0][0] ? rects[i][0][0] : newRect[0][0];
+                    rects[i][0][1] = rects[i][0][1] > newRect[0][1] ? rects[i][0][1] : newRect[0][1];
+                    rects[i][1][0] = newRect[1][0];
+                    rects[i][1][1] = newRect[1][1];
+                    newRect = [];
+                    break;
+                }
+            }
+        }
+        if (newRect.length > 0) {
+            rects.push(newRect);
+        }
+        max = 0;
+        maxPos = 0;
+        var newMaxPos = 0;
+        for (i = 0; i < data.length; i++) {
+            if (data[i] > max) {
+                max = data[i];
+                maxPos = i;
+            }
+        }
+    } while (max > originalMax * 0.70);
+    return rects;
+}
+
+function ImgProcessing() {
+    greyScale(Image.data);
+    var newData = IntensityGradient(Image.data, Image.width);
+    newData = BoxFilter(newData, Image.width, 15);
+    var min = newData[0];
+    var i, x, y;
+    for (i = 1; i < newData.length; i++) {
+        min = min > newData[i] ? newData[i] : min;
+    }
+    var max = 0;
+    var maxPos = 0;
+    var avrgLight = 0;
+    for (i = 0; i < newData.length; i++) {
+        newData[i] = Math.round((newData[i] - min));
+        avrgLight += newData[i];
+        if (max < newData[i]) {
+            max = newData[i];
+            maxPos = i;
+        }
+    }
+    avrgLight /= newData.length;
+    if (avrgLight < 15) {
+        newData = BoxFilter(newData, Image.width, 8);
+        min = newData[0];
+        for (i = 1; i < newData.length; i++) {
+            min = min > newData[i] ? newData[i] : min;
+        }
+        max = 0;
+        maxPos = 0;
+        for (i = 0; i < newData.length; i++) {
+            newData[i] = Math.round((newData[i] - min));
+            if (max < newData[i]) {
+                max = newData[i];
+                maxPos = i;
+            }
+        }
+    }
+    var hist = [];
+    for (i = 0; i <= max; i++) {
+        hist[i] = 0;
+    }
+    for (i = 0; i < newData.length; i++) {
+        hist[newData[i]] = hist[newData[i]] + 1;
+    }
+    var thresh = otsu(hist, newData.length);
+    for (i = 0; i < newData.length; i++) {
+        if (newData[i] < thresh) {
+            Image.data[i * 4] = Image.data[i * 4 + 1] = Image.data[i * 4 + 2] = 0;
+        } else {
+            Image.data[i * 4] = Image.data[i * 4 + 1] = Image.data[i * 4 + 2] = 255;
+        }
+    }
+    CreateTable();
+    var rects = maxLocalization(max, maxPos, newData);
+    var feedBack = [];
+    for (i = 0; i < rects.length; i++) {
+        feedBack.push({
+            x: rects[i][0][0],
+            y: rects[i][1][0],
+            width: rects[i][0][1] - rects[i][0][0],
+            height: rects[i][1][1] - rects[i][1][0]
+        });
+    }
+    if (feedBack.length > 0) postMessage({
+        result: feedBack,
+        success: "localization"
+    });
+    allTables = [];
+    for (i = 0; i < rects.length; i++) {
+        var newTable = [];
+        for (x = rects[i][0][0] * 2; x < rects[i][0][1] * 2; x++) {
+            var tempArray = [];
+            for (y = rects[i][1][0] * 2; y < rects[i][1][1] * 2; y++) {
+                tempArray.push([ScanImage.table[x][y][0], ScanImage.table[x][y][1], ScanImage.table[x][y][2], 255]);
+            }
+            newTable.push(tempArray);
+        }
+        if (newTable.length < 1) continue;
+        Image.table = newTable;
+        Image.width = newTable.length;
+        Image.height = newTable[0].length;
+        CreateImageData();
+        allTables.push({
+            table: newTable,
+            data: new Uint8ClampedArray(Image.data),
+            width: Image.width,
+            height: Image.height
+        });
+    }
+}
+
+function showImage(data, width, height) {
+    postMessage({
+        result: data,
+        width: width,
+        height: height,
+        success: "image"
+    });
+}
+
+function Main() {
+    ImgProcessing();
+    var allResults = [];
+    var tempObj;
+    var tempData;
+    var hist;
+    var val;
+    var thresh;
+    var start;
+    var end;
+    var z, i;
+    for (z = 0; z < allTables.length; z++) {
+        Image = allTables[z];
+        var scaled = ScaleHeight(30);
+        var variationData;
+        var incrmt = 0;
+        var format = "";
+        var first = true;
+        var eanStatistics = {};
+        var eanOrder = [];
+        Selection = false;
+        do {
+            tempData = scaled.subarray(incrmt, incrmt + Image.width * 4);
+            hist = [];
+            for (i = 0; i < 256; i++) {
+                hist[i] = 0;
+            }
+            for (i = 0; i < tempData.length; i += 4) {
+                val = Math.round((tempData[i] + tempData[i + 1] + tempData[i + 2]) / 3);
+                hist[val] = hist[val] + 1;
+            }
+            thresh = otsu(hist, tempData.length / 4);
+            start = thresh < 41 ? 1 : thresh - 40;
+            end = thresh > 254 - 40 ? 254 : thresh + 40;
+            variationData = yStraighten(tempData, start, end);
+            Selection = BinaryString(variationData);
+            if (Selection.string) {
+                format = Selection.format;
+                tempObj = Selection;
+                Selection = Selection.string;
+                if (format === "EAN-13") {
+                    if (typeof eanStatistics[Selection] === 'undefined') {
+                        eanStatistics[Selection] = {
+                            count: 1,
+                            correction: tempObj.correction
+                        };
+                        eanOrder.push(Selection);
+                    } else {
+                        eanStatistics[Selection].count = eanStatistics[Selection].count + 1;
+                        eanStatistics[Selection].correction = eanStatistics[Selection].correction + tempObj.correction;
+                    }
+                    Selection = false;
+                }
+            } else {
+                Selection = false;
+            }
+            incrmt += Image.width * 4;
+        } while (!Selection && incrmt < scaled.length);
+        if (Selection && format !== "EAN-13") allResults.push({
+            Format: format,
+            Value: Selection
+        });
+        if (format === "EAN-13") Selection = false;
+        if (!Selection) {
+            EnlargeTable(4, 2);
+            incrmt = 0;
+            scaled = ScaleHeight(20);
+            do {
+                tempData = scaled.subarray(incrmt, incrmt + Image.width * 4);
+                hist = [];
+                for (i = 0; i < 256; i++) {
+                    hist[i] = 0;
+                }
+                for (i = 0; i < tempData.length; i += 4) {
+                    val = Math.round((tempData[i] + tempData[i + 1] + tempData[i + 2]) / 3);
+                    hist[val] = hist[val] + 1;
+                }
+                thresh = otsu(hist, tempData.length / 4);
+                start = thresh < 40 ? 0 : thresh - 40;
+                end = thresh > 255 - 40 ? 255 : thresh + 40;
+                variationData = yStraighten(tempData, start, end);
+                Selection = BinaryString(variationData);
+                if (Selection.string) {
+                    format = Selection.format;
+                    tempObj = Selection;
+                    Selection = Selection.string;
+                    if (format === "EAN-13") {
+                        if (typeof eanStatistics[Selection] === 'undefined') {
+                            eanStatistics[Selection] = {
+                                count: 1,
+                                correction: tempObj.correction
+                            };
+                            eanOrder.push(Selection);
+                        } else {
+                            eanStatistics[Selection].count = eanStatistics[Selection].count + 1;
+                            eanStatistics[Selection].correction = eanStatistics[Selection].correction + tempObj.correction;
+                        }
+                        Selection = false;
+                    }
+                } else {
+                    Selection = false;
+                }
+                incrmt += Image.width * 4;
+            } while (!Selection && incrmt < scaled.length);
+            if (format === "EAN-13") {
+                var points = {};
+                for (var key in eanStatistics) {
+                    eanStatistics[key].correction = eanStatistics[key].correction / eanStatistics[key].count;
+                    var pointTemp = eanStatistics[key].correction;
+                    pointTemp -= eanStatistics[key].count;
+                    pointTemp += eanOrder.indexOf(key);
+                    points[key] = pointTemp;
+                }
+                var minPoints = Number.POSITIVE_INFINITY;
+                var tempString = "";
+                for (var point in points) {
+                    if (points[point] < minPoints) {
+                        minPoints = points[point];
+                        tempString = key;
+                    }
+                }
+                if (minPoints < 11) {
+                    Selection = tempString;
+                } else {
+                    Selection = false;
+                }
+            }
+            if (Selection) allResults.push({
+                Format: format,
+                Value: Selection
+            });
+        }
+        if (allResults.length > 0 && !Multiple) break;
+    }
+    return allResults;
+}
+
+function yStraighten(img, start, end) {
+    var average = 0;
+    var threshold;
+    var newImg = new Uint8ClampedArray(Image.width * (end - start + 1) * 4);
+    var i, j;
+    for (i = 0; i < newImg.length; i++) {
+        newImg[i] = 255;
+    }
+    for (i = 0; i < Image.width * 4; i += 4) {
+        threshold = end;
+        average = (img[i] + img[i + 1] + img[i + 2]) / 3;
+        if (i < Image.width * 4 - 4) {
+            average += (img[i + 4] + img[i + 5] + img[i + 6]) / 3;
+            average /= 2;
+        }
+        for (j = i; j < newImg.length; j += Image.width * 4) {
+            if (average < threshold) {
+                newImg[j] = newImg[j + 1] = newImg[j + 2] = 0;
+            }
+            threshold--;
+        }
+    }
+    return newImg;
+}
+
+function CheckEan13(values, middle) {
+    if (middle) {
+        if (values.length !== 5) return false;
+    } else {
+        if (values.length !== 3) return false;
+    }
+    var avrg = 0;
+    var i;
+    for (i = 0; i < values.length; i++) {
+        avrg += values[i];
+    }
+    avrg /= values.length;
+    for (i = 0; i < values.length; i++) {
+        if (values[i] / avrg < 0.5 || values[i] / avrg > 1.5) return false;
+    }
+    return true;
+}
+
+function TwoOfFiveStartEnd(values, start) {
+    if (values.length < 5 || values.length > 6) return false;
+    var maximum = 0;
+    var TwoOfFiveMax = [0, 0];
+    var u;
+    for (u = 0; u < values.length; u++) {
+        if (values[u] > maximum) {
+            maximum = values[u];
+            TwoOfFiveMax[0] = u;
+        }
+    }
+    maximum = 0;
+    for (u = 0; u < values.length; u++) {
+        if (u === TwoOfFiveMax[0]) continue;
+        if (values[u] > maximum) {
+            maximum = values[u];
+            TwoOfFiveMax[1] = u;
+        }
+    }
+    if (start) {
+        return TwoOfFiveMax[0] + TwoOfFiveMax[1] === 2;
+    } else {
+        return TwoOfFiveMax[0] + TwoOfFiveMax[1] === 2;
+    }
+}
+
+function CheckInterleaved(values, start) {
+    var average = 0;
+    var i;
+    for (i = 0; i < values.length; i++) {
+        average += values[i];
+    }
+    average /= 4;
+    if (start) {
+        if (values.length !== 4) return false;
+        for (i = 0; i < values.length; i++) {
+            if (values[i] / average < 0.5 || values[i] / average > 1.5) return false;
+        }
+        return true;
+    } else {
+        if (values.length !== 3) return false;
+        var max = 0;
+        var pos;
+        for (i = 0; i < values.length; i++) {
+            if (values[i] > max) {
+                max = values[i];
+                pos = i;
+            }
+        }
+        if (pos !== 0) return false;
+        if (values[0] / average < 1.5 || values[0] / average > 2.5) return false;
+        for (i = 1; i < values.length; i++) {
+            if (values[i] / average < 0.5 || values[i] / average > 1.5) return false;
+        }
+        return true;
+    }
+}
+
+function BinaryConfiguration(binaryString, type) {
+    var result = [];
+    var binTemp = [];
+    var count = 0;
+    var bars;
+    var len;
+    var totalBars;
+    var i;
+    if (type === "Code128" || type === "Code93") {
+        totalBars = 6;
+        len = binaryString[0];
+        if (type === "Code128") len /= 2;
+        for (i = 0; i < binaryString.length; i++) {
+            if (binaryString[i] > len * 6) {
+                binaryString.splice(i, binaryString.length);
+                break;
+            }
+        }
+        do {
+            if (binaryString.length === 7 && type === "Code128") {
+                result.push(binaryString.splice(0, binaryString.length));
+            } else {
+                result.push(binaryString.splice(0, totalBars));
+            }
+            if (type === "Code93" && binaryString.length < 6) binaryString.splice(0, totalBars);
+        } while (binaryString.length > 0);
+    }
+    if (type === "Code39") {
+        totalBars = 9;
+        len = binaryString[0];
+        for (i = 0; i < binaryString.length; i++) {
+            if (binaryString[i] > len * 5) {
+                binaryString.splice(i, binaryString.length);
+                break;
+            }
+        }
+        do {
+            result.push(binaryString.splice(0, totalBars));
+            binaryString.splice(0, 1);
+        } while (binaryString.length > 0);
+    }
+    if (type === "EAN-13") {
+        totalBars = 4;
+        len = binaryString[0];
+        var secureCount = 0;
+        for (i = 0; i < binaryString.length; i++) {
+            if (binaryString[i] > len * 6) {
+                binaryString.splice(i, binaryString.length);
+                break;
+            }
+        }
+        if (CheckEan13(binaryString.splice(0, 3), false)) secureCount++;
+        count = 0;
+        do {
+            result.push(binaryString.splice(0, totalBars));
+            count++;
+            if (count === 6)
+                if (CheckEan13(binaryString.splice(0, 5), true)) secureCount++;
+        } while (result.length < 12 && binaryString.length > 0);
+        if (CheckEan13(binaryString.splice(0, 3), false)) secureCount++;
+        if (secureCount < 2) return [];
+    }
+    if (type === "2Of5") {
+        totalBars = 5;
+        len = binaryString[0] / 2;
+        for (i = 0; i < binaryString.length; i++) {
+            if (binaryString[i] > len * 5) {
+                binaryString.splice(i, binaryString.length);
+                break;
+            }
+        }
+        var temp = binaryString.splice(0, 6);
+        result.push(temp);
+        do {
+            binTemp = [];
+            for (i = 0; i < totalBars; i++) {
+                binTemp.push(binaryString.splice(0, 1)[0]);
+                // binaryString.splice(0, 1)[0];
+            }
+            result.push(binTemp);
+            if (binaryString.length === 5) result.push(binaryString.splice(0, 5));
+        } while (binaryString.length > 0);
+    }
+    if (type === "Inter2Of5") {
+        totalBars = 5;
+        len = binaryString[0];
+        for (i = 0; i < binaryString.length; i++) {
+            if (binaryString[i] > len * 5) {
+                binaryString.splice(i, binaryString.length);
+                break;
+            }
+        }
+        result.push(binaryString.splice(0, 4));
+        var binTempWhite = [];
+        do {
+            binTemp = [];
+            binTempWhite = [];
+            for (i = 0; i < totalBars; i++) {
+                binTemp.push(binaryString.splice(0, 1)[0]);
+                binTempWhite.push(binaryString.splice(0, 1)[0]);
+            }
+            result.push(binTemp);
+            result.push(binTempWhite);
+            if (binaryString.length === 3) result.push(binaryString.splice(0, 3));
+        } while (binaryString.length > 0);
+    }
+    if (type === "Codabar") {
+        totalBars = 7;
+        len = binaryString[0];
+        for (i = 0; i < binaryString.length; i++) {
+            if (binaryString[i] > len * 5) {
+                binaryString.splice(i, binaryString.length);
+                break;
+            }
+        }
+        do {
+            result.push(binaryString.splice(0, totalBars));
+            binaryString.splice(0, 1);
+        } while (binaryString.length > 0);
+    }
+    return result;
+}
+
+function BinaryString(img, type) {
+    var binaryString = [];
+    var binTemp = [];
+    var container = 255;
+    var count = 0;
+    var format;
+    var tempString;
+    var j, i;
+    for (j = 0; j < img.length - Image.width * 4; j += Image.width * 4) {
+        var SlicedArray = img.subarray(j, j + Image.width * 4);
+        binaryString = [];
+        i = 0;
+        while (SlicedArray[i] === 255) {
+            i += 4;
+        }
+        while (i < SlicedArray.length) {
+            count = 0;
+            container = SlicedArray[i];
+            while (SlicedArray[i] === container && i < SlicedArray.length) {
+                count++;
+                i += 4;
+            }
+            binaryString.push(count);
+        }
+        if (binaryString.length > 2 && binaryString[0] <= binaryString[1] / 10) {
+            binaryString.splice(0, 2);
+        }
+        var binaryHolder = binaryString.slice();
+        var success = false;
+        for (i = 0; i < FormatPriority.length; i++) {
+            binaryString = binaryHolder.slice();
+            var first;
+            var second;
+            binaryString = BinaryConfiguration(binaryString, FormatPriority[i]);
+            if (FormatPriority[i] === "2Of5" || FormatPriority[i] === "Inter2Of5") {
+                first = binaryString.splice(0, 1)[0];
+                second = binaryString.splice(binaryString.length - 1, 1)[0];
+            }
+            binTemp = Distribution(binaryString, FormatPriority[i]);
+            if (FormatPriority[i] === "EAN-13") {
+                binaryString = binTemp.data;
+                corrections = binTemp.correction;
+            } else {
+                binaryString = binTemp;
+            }
+            if (typeof binaryString === 'undefined') continue;
+            if (binaryString.length > 4 || (FormatPriority[i] === "Code39" && binaryString.length > 2)) {
+                if (FormatPriority[i] === "Code128") {
+                    if (CheckCode128(binaryString)) {
+                        binaryString = DecodeCode128(binaryString);
+                        success = true;
+                    }
+                } else if (FormatPriority[i] === "Code93") {
+                    if (CheckCode93(binaryString)) {
+                        binaryString = DecodeCode93(binaryString);
+                        success = true;
+                    }
+                } else if (FormatPriority[i] === "Code39") {
+                    if (CheckCode39(binaryString)) {
+                        binaryString = DecodeCode39(binaryString);
+                        success = true;
+                    }
+                } else if (FormatPriority[i] === "EAN-13") {
+                    tempString = DecodeEAN13(binaryString);
+                    if (tempString) {
+                        if (tempString.length === 13) {
+                            binaryString = tempString;
+                            success = true;
+                        }
+                    }
+                } else if (FormatPriority[i] === "2Of5" || FormatPriority[i] === "Inter2Of5") {
+                    if (FormatPriority[i] === "2Of5") {
+                        if (typeof first !== 'undefined')
+                            if (!TwoOfFiveStartEnd(first, true)) continue;
+                        if (typeof second !== 'undefined')
+                            if (!TwoOfFiveStartEnd(second, false)) continue;
+                    }
+                    if (FormatPriority[i] === "Inter2Of5") {
+                        if (typeof first !== 'undefined')
+                            if (!CheckInterleaved(first, true)) continue;
+                        if (typeof second !== 'undefined')
+                            if (!CheckInterleaved(second, false)) continue;
+                    }
+                    tempString = Decode2Of5(binaryString);
+                    if (tempString) {
+                        binaryString = tempString;
+                        success = true;
+                    }
+                } else if (FormatPriority[i] === "Codabar") {
+                    tempString = DecodeCodaBar(binaryString);
+                    if (tempString) {
+                        binaryString = tempString;
+                        success = true;
+                    }
+                }
+            }
+            if (success) {
+                format = FormatPriority[i];
+                if (format === "Inter2Of5") format = "Interleaved 2 of 5";
+                if (format === "2Of5") format = "Standard 2 of 5";
+                break;
+            }
+        }
+        if (success) break;
+    }
+    if (format === "Code128") {
+        if (typeof binaryString.string === 'string') {
+            return binaryString;
+        } else {
+            return {
+                string: false
+            };
+        }
+    }
+    if (typeof binaryString === 'string') {
+        if (format === "EAN-13") {
+            return {
+                string: binaryString,
+                format: format,
+                correction: corrections
+            };
+        } else {
+            return {
+                string: binaryString,
+                format: format
+            };
+        }
+    } else {
+        return {
+            string: false
+        };
+    }
+}
+
+function Distribution(totalBinArray, type) {
+    var testData = 0;
+    var result = [];
+    var totalBars;
+    var total;
+    var maxLength;
+    var k, i, j;
+    var blackMax;
+    var whiteMax;
+    var wideAvrg;
+    var narrowAvrg;
+    var prevPos;
+    var wideValues;
+    var max;
+    type = availableFormats.indexOf(type);
+    if (type === 0) {
+        total = 11;
+        totalBars = 6;
+        maxLength = 4;
+    } else if (type === 1) {
+        total = 9;
+        totalBars = 6;
+        maxLength = 4;
+    } else if (type === 2) {
+        total = 12;
+        totalBars = 9;
+    } else if (type === 3 && totalBinArray.length === 7) {
+        total = 4;
+        totalBars = 2;
+        maxLength = 2;
+    } else if (type === 3) {
+        total = 7;
+        totalBars = 4;
+        maxLength = 4;
+    } else if (type === 6) {
+        totalBars = 7;
+    }
+    for (k = 0; k < totalBinArray.length; k++) {
+        var BinArray = totalBinArray[k];
+        var sum = 0;
+        var counter = 0;
+        var tempBin = [];
+        var narrowArr = [];
+        var wideArr = [];
+        if (type === 6) {
+            var upperTolerance = 1.5;
+            var lowerTolerance = 1 / 2;
+            if (BinArray.length !== 7) return [];
+            if (k === 0 || k === totalBinArray.length - 1) {
+                whiteMax = [
+                    [0, 0],
+                    [0, 0]
+                ];
+                blackMax = [0, 0];
+                for (i = 0; i < BinArray.length; i++) {
+                    if (i % 2 === 0) {
+                        if (BinArray[i] > blackMax[0]) {
+                            blackMax[0] = BinArray[i];
+                            blackMax[1] = i;
+                        }
+                    } else {
+                        if (BinArray[i] > whiteMax[0][0]) {
+                            whiteMax[0][0] = BinArray[i];
+                            prevPos = whiteMax[0][1];
+                            whiteMax[0][1] = i;
+                            i = prevPos - 1;
+                            continue;
+                        }
+                        if (BinArray[i] > whiteMax[1][0] && i !== whiteMax[0][1]) {
+                            whiteMax[1][0] = BinArray[i];
+                            whiteMax[1][1] = i;
+                        }
+                    }
+                }
+                if (SecureCodabar) {
+                    wideAvrg = whiteMax[0][0] + whiteMax[1][0] + blackMax[0];
+                    wideAvrg /= 3;
+                    wideValues = [whiteMax[0][0], whiteMax[1][0], blackMax[0]];
+                    for (i = 0; i < wideValues.length; i++) {
+                        if (wideValues[i] / wideAvrg > upperTolerance || wideValues[i] / wideAvrg < lowerTolerance) return [];
+                    }
+                    narrowAvrg = 0;
+                    for (i = 0; i < BinArray.length; i++) {
+                        if (i === blackMax[1] || i === whiteMax[0][1] || i === whiteMax[1][1]) continue;
+                        narrowAvrg += BinArray[i];
+                    }
+                    narrowAvrg /= 4;
+                    for (i = 0; i < BinArray.length; i++) {
+                        if (i === blackMax[1] || i === whiteMax[0][1] || i === whiteMax[1][1]) continue;
+                        if (BinArray[i] / narrowAvrg > upperTolerance || BinArray[i] / narrowAvrg < lowerTolerance) return [];
+                    }
+                }
+                for (i = 0; i < BinArray.length; i++) {
+                    if (i === blackMax[1] || i === whiteMax[0][1] || i === whiteMax[1][1]) {
+                        tempBin.push(1);
+                    } else {
+                        tempBin.push(0);
+                    }
+                }
+            } else {
+                blackMax = [0, 0];
+                whiteMax = [0, 0];
+                for (i = 0; i < BinArray.length; i++) {
+                    if (i % 2 === 0) {
+                        if (BinArray[i] > blackMax[0]) {
+                            blackMax[0] = BinArray[i];
+                            blackMax[1] = i;
+                        }
+                    } else {
+                        if (BinArray[i] > whiteMax[0]) {
+                            whiteMax[0] = BinArray[i];
+                            whiteMax[1] = i;
+                        }
+                    }
+                }
+                if (blackMax[0] / whiteMax[0] > 1.55) {
+                    var tempArray = blackMax;
+                    blackMax = [tempArray, [0, 0],
+                        [0, 0]
+                    ];
+                    for (i = 0; i < BinArray.length; i++) {
+                        if (i % 2 === 0) {
+                            if (BinArray[i] > blackMax[1][0] && i !== blackMax[0][1]) {
+                                blackMax[1][0] = BinArray[i];
+                                prevPos = blackMax[1][1];
+                                blackMax[1][1] = i;
+                                i = prevPos - 1;
+                                continue;
+                            }
+                            if (BinArray[i] > blackMax[2][0] && i !== blackMax[0][1] && i !== blackMax[1][1]) {
+                                blackMax[2][0] = BinArray[i];
+                                blackMax[2][1] = i;
+                            }
+                        }
+                    }
+                    if (SecureCodabar) {
+                        wideAvrg = blackMax[0][0] + blackMax[1][0] + blackMax[2][0];
+                        wideAvrg /= 3;
+                        for (i = 0; i < blackMax.length; i++) {
+                            if (blackMax[i][0] / wideAvrg > upperTolerance || blackMax[i][0] / wideAvrg < lowerTolerance) return [];
+                        }
+                        narrowAvrg = 0;
+                        for (i = 0; i < BinArray.length; i++) {
+                            if (i === blackMax[0][1] || i === blackMax[1][1] || i === blackMax[2][1]) continue;
+                            narrowAvrg += BinArray[i];
+                        }
+                        narrowAvrg /= 4;
+                        for (i = 0; i < BinArray.length; i++) {
+                            if (i === blackMax[0][1] || i === blackMax[1][1] || i === blackMax[2][1]) continue;
+                            if (BinArray[i] / narrowAvrg > upperTolerance || BinArray[i] / narrowAvrg < lowerTolerance) return [];
+                        }
+                    }
+                    for (i = 0; i < BinArray.length; i++) {
+                        if (i === blackMax[0][1] || i === blackMax[1][1] || i === blackMax[2][1]) {
+                            tempBin.push(1);
+                        } else {
+                            tempBin.push(0);
+                        }
+                    }
+                } else {
+                    if (SecureCodabar) {
+                        wideAvrg = blackMax[0] + whiteMax[0];
+                        wideAvrg /= 2;
+                        if (blackMax[0] / wideAvrg > 1.5 || blackMax[0] / wideAvrg < 0.5) return [];
+                        if (whiteMax[0] / wideAvrg > 1.5 || whiteMax[0] / wideAvrg < 0.5) return [];
+                        narrowAvrg = 0;
+                        for (i = 0; i < BinArray.length; i++) {
+                            if (i === blackMax[1] || i === whiteMax[1]) continue;
+                            narrowAvrg += BinArray[i];
+                        }
+                        narrowAvrg /= 5;
+                        for (i = 0; i < BinArray.length; i++) {
+                            if (i === blackMax[1] || i === whiteMax[1]) continue;
+                            if (BinArray[i] / narrowAvrg > upperTolerance || BinArray[i] / narrowAvrg < lowerTolerance) return [];
+                        }
+                    }
+                    for (i = 0; i < BinArray.length; i++) {
+                        if (i === blackMax[1] || i === whiteMax[1]) {
+                            tempBin.push(1);
+                        } else {
+                            tempBin.push(0);
+                        }
+                    }
+                }
+            }
+            result.push(tempBin);
+            continue;
+        }
+        if (type === 4 || type === 5) {
+            max = [
+                [0, 0],
+                [0, 0]
+            ];
+            for (i = 0; i < BinArray.length; i++) {
+                if (!isFinite(BinArray[i])) return [];
+                if (BinArray[i] > max[0][0]) {
+                    max[0][0] = BinArray[i];
+                    prevPos = max[0][1];
+                    max[0][1] = i;
+                    i = prevPos - 1;
+                }
+                if (BinArray[i] > max[1][0] && i !== max[0][1]) {
+                    max[1][0] = BinArray[i];
+                    max[1][1] = i;
+                }
+            }
+            if (Secure2Of5) {
+                wideAvrg = max[0][0] + max[1][0];
+                wideAvrg /= 2;
+                if (max[0][0] / wideAvrg > 1.3 || max[0][0] / wideAvrg < 0.7) return [];
+                if (max[1][0] / wideAvrg > 1.3 || max[1][0] / wideAvrg < 0.7) return [];
+                narrowAvrg = 0;
+                for (i = 0; i < BinArray.length; i++) {
+                    if (i === max[0][1] || i === max[1][1]) continue;
+                    narrowAvrg += BinArray[i];
+                }
+                narrowAvrg /= 3;
+                for (i = 0; i < BinArray.length; i++) {
+                    if (i === max[0][1] || i === max[1][1]) continue;
+                    if (BinArray[i] / narrowAvrg > 1.3 || BinArray[i] / narrowAvrg < 0.7) return [];
+                }
+            }
+            for (i = 0; i < BinArray.length; i++) {
+                if (i === max[0][1] || i === max[1][1]) {
+                    tempBin.push(1);
+                    continue;
+                }
+                tempBin.push(0);
+            }
+            result.push(tempBin);
+            continue;
+        }
+        while (counter < totalBars) {
+            sum += BinArray[counter];
+            counter++;
+        }
+        if (type === 2) {
+            var indexCount = [];
+            blackMax = [
+                [0, 0],
+                [0, 0]
+            ];
+            whiteMax = [0, 0];
+            for (j = 0; j < BinArray.length; j++) {
+                if (j % 2 === 0) {
+                    if (BinArray[j] > blackMax[0][0]) {
+                        blackMax[0][0] = BinArray[j];
+                        prevPos = blackMax[0][1];
+                        blackMax[0][1] = j;
+                        j = prevPos;
+                    }
+                    if (BinArray[j] > blackMax[1][0] && j !== blackMax[0][1]) {
+                        blackMax[1][0] = BinArray[j];
+                        blackMax[1][1] = j;
+                    }
+                } else {
+                    if (BinArray[j] > whiteMax[0]) {
+                        whiteMax[0] = BinArray[j];
+                        whiteMax[1] = j;
+                    }
+                }
+            }
+            if (whiteMax[0] / blackMax[0][0] > 1.5 && whiteMax[0] / blackMax[1][0] > 1.5) {
+                blackMax = [
+                    [0, 0],
+                    [0, 0]
+                ];
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j % 2 !== 0) {
+                        if (BinArray[j] > blackMax[0][0] && j !== whiteMax[1]) {
+                            blackMax[0][0] = BinArray[j];
+                            prevPos = blackMax[0][1];
+                            blackMax[0][1] = j;
+                            j = prevPos;
+                        }
+                        if (BinArray[j] > blackMax[1][0] && j !== blackMax[0][1] && j !== whiteMax[1]) {
+                            blackMax[1][0] = BinArray[j];
+                            blackMax[1][1] = j;
+                        }
+                    }
+                }
+            }
+            wideAvrg = blackMax[0][0] + blackMax[1][0] + whiteMax[0];
+            wideAvrg /= 3;
+            if (blackMax[0][0] / wideAvrg > 1.6 || blackMax[0][0] / wideAvrg < 0.4) return [];
+            if (blackMax[1][0] / wideAvrg > 1.6 || blackMax[1][0] / wideAvrg < 0.4) return [];
+            if (whiteMax[0] / wideAvrg > 1.6 || whiteMax[0] / wideAvrg < 0.4) return [];
+            narrowAvrg = 0;
+            for (i = 0; i < BinArray.length; i++) {
+                if (i === blackMax[0][1] || i === blackMax[1][1] || i === whiteMax[1]) continue;
+                narrowAvrg += BinArray[i];
+            }
+            narrowAvrg /= 6;
+            for (i = 0; i < BinArray.length; i++) {
+                if (i === blackMax[0][1] || i === blackMax[1][1] || i === whiteMax[1]) continue;
+                if (BinArray[i] / narrowAvrg > 1.6 || BinArray[i] / narrowAvrg < 0.4) return [];
+            }
+            for (j = 0; j < BinArray.length; j++) {
+                if (j === blackMax[0][1] || j === blackMax[1][1] || j === whiteMax[1]) {
+                    tempBin.push(2);
+                } else {
+                    tempBin.push(1);
+                }
+            }
+            result.push(tempBin);
+            continue;
+        }
+        if (type === 3) {
+            max = [
+                [0, 0],
+                [0, 0],
+                [0, 0]
+            ];
+            for (j = 0; j < BinArray.length; j++) {
+                if (BinArray[j] > max[0][0]) {
+                    max[0][0] = BinArray[j];
+                    prevPos = max[0][1];
+                    max[0][1] = j;
+                    j = prevPos;
+                }
+                if (BinArray[j] > max[1][0] && j !== max[0][1]) {
+                    max[1][0] = BinArray[j];
+                    prevPos = max[1][1];
+                    max[1][1] = j;
+                    j = prevPos;
+                }
+                if (BinArray[j] > max[2][0] && j !== max[0][1] && j !== max[1][1]) {
+                    max[2][0] = BinArray[j];
+                    max[2][1] = j;
+                }
+            }
+            if (max[0][0] / max[1][0] >= 3) {
+                narrowAvrg = 0;
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j === max[0][1]) continue;
+                    narrowAvrg += BinArray[j];
+                }
+                narrowAvrg /= 3;
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j === max[0][1]) continue;
+                    if (BinArray[j] / narrowAvrg < 0.02 || BinArray[j] / narrowAvrg > 3) return {
+                        data: [],
+                        correction: 0
+                    };
+                }
+                if (max[0][0] / narrowAvrg < 2.2 || max[0][0] / narrowAvrg > 6) return {
+                    data: [],
+                    correction: 0
+                };
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j === max[0][1]) {
+                        tempBin.push(4);
+                    } else {
+                        tempBin.push(1);
+                    }
+                }
+                result.push(tempBin);
+            } else if (max[0][0] / max[2][0] > 2) {
+                wideAvrg = max[0][0] + max[1][0];
+                wideAvrg /= 5;
+                if (max[0][0] / (wideAvrg * 3) < 0.02 || max[0][0] / (wideAvrg * 3) > 3) return {
+                    data: [],
+                    correction: 0
+                };
+                if (max[1][0] / (wideAvrg * 2) < 0.02 || max[1][0] / (wideAvrg * 2) > 3) return {
+                    data: [],
+                    correction: 0
+                };
+                narrowAvrg = 0;
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j === max[0][1] || j === max[1][1]) continue;
+                    narrowAvrg += BinArray[j];
+                }
+                narrowAvrg /= 2;
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j === max[0][1] || j === max[1][1]) continue;
+                    if (BinArray[j] / narrowAvrg < 0.02 || BinArray[j] / narrowAvrg > 3) return {
+                        data: [],
+                        correction: 0
+                    };
+                }
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j === max[0][1]) {
+                        tempBin.push(3);
+                    } else if (j === max[1][1]) {
+                        tempBin.push(2);
+                    } else {
+                        tempBin.push(1);
+                    }
+                }
+                result.push(tempBin);
+            } else {
+                if (max[0][1] % 2 === max[1][1] % 2 && max[0][1] % 2 === max[2][1] % 2) {
+                    var modMem = max[0][1] % 2;
+                    max[2] = [0, 0];
+                    for (j = 0; j < BinArray.length; j++) {
+                        if (j % 2 === modMem) continue;
+                        if (BinArray[j] > max[2][0]) {
+                            max[2][0] = BinArray[j];
+                            max[2][1] = j;
+                        }
+                    }
+                }
+                wideAvrg = max[0][0] + max[1][0] + max[2][0];
+                wideAvrg /= 3;
+                for (j = 0; j < max.length; j++) {
+                    if (max[j][0] / wideAvrg < 0.02 || max[j][0] / wideAvrg > 3) return {
+                        data: [],
+                        correction: 0
+                    };
+                }
+                var narrow = 0;
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j === max[0][1] || j === max[1][1] || j === max[2][1]) continue;
+                    narrow = BinArray[j];
+                }
+                if (wideAvrg / narrow < 0.02 || wideAvrg / narrow > 3) return {
+                    data: [],
+                    correction: 0
+                };
+                for (j = 0; j < BinArray.length; j++) {
+                    if (j === max[0][1] || j === max[1][1] || j === max[2][1]) {
+                        tempBin.push(2);
+                    } else {
+                        tempBin.push(1);
+                    }
+                }
+                result.push(tempBin);
+            }
+            for (j = 0; j < tempBin.length; j++) {
+                testData += Math.abs(tempBin[j] - (BinArray[j] / sum) * total);
+            }
+            continue;
+        }
+        counter = 0;
+        while (counter < totalBars) {
+            tempBin.push((BinArray[counter] / sum) * total);
+            counter++;
+        }
+        counter = 0;
+        while (counter < totalBars) {
+            tempBin[counter] = tempBin[counter] > maxLength ? maxLength : tempBin[counter];
+            tempBin[counter] = tempBin[counter] < 1 ? 1 : tempBin[counter];
+            tempBin[counter] = Math.round(tempBin[counter]);
+            counter++;
+        }
+        if (type === 3) {
+            var checking = 0;
+            for (i = 0; i < tempBin.length; i++) {
+                checking += tempBin[i];
+            }
+            if (checking > 7) {
+                max = 0;
+                var hitIndex = 0;
+                for (i = 0; i < tempBin.length; i++) {
+                    if (tempBin[i] > max) {
+                        max = tempBin[i];
+                        hitIndex = i;
+                    }
+                }
+                tempBin[hitIndex] = max - (checking - 7);
+            }
+        }
+        if (type === 3) {
+            for (i = 0; i < tempBin.length; i++) {
+                testData += Math.abs(tempBin[i] - (BinArray[i] / sum) * total);
+            }
+        }
+        result.push(tempBin);
+    }
+    if (type === 3) {
+        return {
+            data: result,
+            correction: testData
+        };
+    } else {
+        return result;
+    }
+}
+
+function CheckCode128(string) {
+    var checksum = string[string.length - 2].join("");
+    var i;
+    checksum = Code128Encoding.value.indexOf(checksum);
+    if (checksum === -1) return false;
+    var summarizer = Code128Encoding.value.indexOf(string[0].join(""));
+    if (summarizer === -1) return false;
+    var startChar = Code128Encoding[string[0].join("")];
+    if (typeof startChar === 'undefined') return false;
+    if (startChar !== "A" && startChar !== "B" && startChar !== "C") return false;
+    for (i = 1; i < (string.length - 2); i++) {
+        summarizer += Code128Encoding.value.indexOf(string[i].join("")) * i;
+        if (Code128Encoding.value.indexOf(string[i].join("")) === -1) return false;
+    }
+    return (summarizer % 103 === checksum);
+}
+
+function Decode2Of5(string) {
+    var result = "";
+    var i;
+    for (i = 0; i < string.length; i++) {
+        if (TwoOfFiveEncoding.indexOf(string[i].join("")) === -1) return false;
+        result += TwoOfFiveEncoding.indexOf(string[i].join(""));
+    }
+    return result;
+}
+
+function DecodeCodaBar(string) {
+    var result = "";
+    var start = string[0].join("");
+    var end = string[string.length - 1].join("");
+    var i;
+    if (!(CodaBarEncoding[start] === "A" || CodaBarEncoding[start] === "B" || CodaBarEncoding[start] === "C" || CodaBarEncoding[start] === "D")) return false;
+    if (!(CodaBarEncoding[end] === "A" || CodaBarEncoding[end] === "B" || CodaBarEncoding[end] === "C" || CodaBarEncoding[end] === "D")) return false;
+    for (i = 1; i < string.length - 1; i++) {
+        if (typeof CodaBarEncoding[string[i].join("")] === 'undefined') return false;
+        result += CodaBarEncoding[string[i].join("")];
+    }
+    return result;
+}
+
+function checkResultForEAN(resultArray) {
+    var weight = 3;
+    var sum = 0;
+    for (i = resultArray.length - 2; i >= 0; i--) {
+        sum += resultArray[i] * weight;
+        weight = weight === 3 ? 1 : 3;
+    }
+    sum = (10 - sum % 10) % 10;
+    return sum;
+}
+
+function DecodeEAN13(string) {
+    if (!(string.length === 12 || string.length === 7)) return false;
+    var md = 0;
+    if (string.length === 7) {
+        if (string[string.length - 1].join("") != "23") return false;
+        string.splice(string.length - 1, 1);
+        md = 1;
+    };
+    var leftSide = string.slice(0, 6);
+    var trigger = false;
+    var rightSide = string.slice(6, string.length);
+    var i;
+    for (i = 0; i < leftSide.length; i++) {
+        leftSide[i] = leftSide[i].join("");
+        if (leftSide[i].length !== 4) {
+            trigger = true;
+            break;
+        }
+    }
+    if (trigger) return false;
+    for (i = 0; i < rightSide.length; i++) {
+        rightSide[i] = rightSide[i].join("");
+        if (rightSide[i].length !== 4) {
+            trigger = true;
+            break;
+        }
+    }
+    if (trigger) return false;
+    var decodeFormat = [];
+    for (i = 0; i < leftSide.length; i++) {
+        if (typeof EAN13Encoding.L[leftSide[i]] !== 'undefined') {
+            decodeFormat.push("L");
+        } else if (typeof EAN13Encoding.G[leftSide[i]] !== 'undefined') {
+            decodeFormat.push("G");
+        } else {
+            trigger = true;
+            break;
+        }
+    }
+    if (trigger) return false;
+    var resultArray = [];
+    if (typeof EAN13Encoding.formats[decodeFormat.join("")] === 'undefined') return false;
+    resultArray.push(EAN13Encoding.formats[decodeFormat.join("")]);
+    for (i = 0; i < leftSide.length; i++) {
+        if (typeof EAN13Encoding[decodeFormat[i]][leftSide[i]] === 'undefined') {
+            trigger = true;
+            break;
+        }
+        resultArray.push(EAN13Encoding[decodeFormat[i]][leftSide[i]]);
+    }
+    if (trigger) return false;
+    for (i = 0; i < rightSide.length; i++) {
+        if (typeof EAN13Encoding["R"][rightSide[i]] !== 'undefined') {
+            resultArray.push(EAN13Encoding["R"][rightSide[i]]);
+        } else if (typeof EAN13Encoding["G"][rightSide[i]] !== 'undefined') {
+            resultArray.push(EAN13Encoding["G"][rightSide[i]]);
+        } else {
+            trigger = true;
+            break;
+        }
+    }
+    if (trigger) return false;
+    var sum = md ? resultArray[0] : checkResultForEAN(resultArray.join(""), 1);
+    if (resultArray[resultArray.length - 1] === sum || resultArray[0] === sum) {
+        return resultArray.join("");
+    } else {
+        return false;
+    }
+}
+
+function CheckCode93(string) {
+    var checkOne = string[string.length - 3].join("");
+    var checkTwo = string[string.length - 2].join("");
+    var failSafe = true;
+    if (typeof Code93Encoding[checkOne] === 'undefined') return false;
+    if (typeof Code93Encoding[checkTwo] === 'undefined') return false;
+    var checkSum = Code93Encoding[checkOne].value;
+    var weight = 1;
+    var sum = 0;
+    var i;
+    for (i = string.length - 4; i > 0; i--) {
+        failSafe = typeof Code93Encoding[string[i].join("")] === 'undefined' ? false : failSafe;
+        if (!failSafe) break;
+        sum += Code93Encoding[string[i].join("")].value * weight;
+        weight++;
+        if (weight > 20) weight = 1;
+    }
+    var firstCheck = sum % 47;
+    var firstBool = firstCheck === checkSum;
+    if (!firstBool) return false;
+    if (!failSafe) return false;
+    sum = firstCheck;
+    weight = 2;
+    checkSum = Code93Encoding[checkTwo].value;
+    for (i = string.length - 4; i > 0; i--) {
+        failSafe = typeof Code93Encoding[string[i].join("")] === 'undefined' ? false : failSafe;
+        if (!failSafe) break;
+        sum += Code93Encoding[string[i].join("")].value * weight;
+        weight++;
+        if (weight > 15) weight = 1;
+    }
+    var secondCheck = sum % 47;
+    var secondBool = secondCheck === checkSum;
+    return secondBool && firstBool;
+}
+
+function CheckCode39(string) {
+    var trigger = true;
+    if (typeof Code39Encoding[string[0].join("")] === 'undefined') return false;
+    if (Code39Encoding[string[0].join("")].character !== "*") return false;
+    if (typeof Code39Encoding[string[string.length - 1].join("")] === 'undefined') return false;
+    if (Code39Encoding[string[string.length - 1].join("")].character !== "*") return false;
+    for (i = 1; i < string.length - 1; i++) {
+        if (typeof Code39Encoding[string[i].join("")] === 'undefined') {
+            trigger = false;
+            break;
+        }
+    }
+    return trigger;
+}
+
+function DecodeCode39(string) {
+    var resultString = "";
+    var special = false;
+    var character = "";
+    var specialchar = "";
+    for (i = 1; i < string.length - 1; i++) {
+        character = Code39Encoding[string[i].join("")].character;
+        if (character === "$" || character === "/" || character === "+" || character === "%") {
+            // if next character exists => this a special character
+            if (i + 1 < string.length - 1) {
+                special = true;
+                specialchar = character;
+                continue;
+            }
+        }
+        if (special) {
+            if (typeof ExtendedEncoding[specialchar + character] === 'undefined') {} else {
+                resultString += ExtendedEncoding[specialchar + character];
+            }
+            special = false;
+            continue;
+        }
+        resultString += character;
+    }
+    return resultString;
+}
+
+function DecodeCode93(string) {
+    var resultString = "";
+    var special = false;
+    var character = "";
+    var specialchar = "";
+    for (i = 1; i < string.length - 3; i++) {
+        character = Code93Encoding[string[i].join("")].character;
+        if (character === "($)" || character === "(/)" || character === "(+)" || character === "(%)") {
+            special = true;
+            specialchar = character[1];
+            continue;
+        }
+        if (special) {
+            if (typeof ExtendedEncoding[specialchar + character] === 'undefined') {} else {
+                resultString += ExtendedEncoding[specialchar + character];
+            }
+            special = false;
+            continue;
+        }
+        resultString += character;
+    }
+    return resultString;
+}
+
+function DecodeCode128(string) {
+    var set = Code128Encoding[string[0].join("")];
+    var symbol;
+    var Code128Format = "Code128";
+    var resultString = "";
+    var i;
+    for (i = 1; i < (string.length - 2); i++) {
+        symbol = Code128Encoding[string[i].join("")][set];
+        switch (symbol) {
+            case "FNC1":
+                if (i === 1) Code128Format = "GS1-128";
+                break;
+            case "FNC2":
+            case "FNC3":
+            case "FNC4":
+                break;
+            case "SHIFT_B":
+                i++;
+                resultString += Code128Encoding[string[i].join("")].B;
+                break;
+            case "SHIFT_A":
+                i++;
+                resultString += Code128Encoding[string[i].join("")].A;
+                break;
+            case "Code_A":
+                set = "A";
+                break;
+            case "Code_B":
+                set = "B";
+                break;
+            case "Code_C":
+                set = "C";
+                break;
+            default:
+                resultString += symbol;
+        }
+    }
+    return {
+        string: resultString,
+        format: Code128Format
+    };
+}
+
+function checkFinalResult(result) {
+    for (i = 0; i < result.length; i++) {
+        if (result[i].Format === 'EAN-13') {
+            if (result[i].Value.length === 7) {
+                result[i].Value = result[i].Value.substring(1, 7);
+                result[i].Format = 'UPC-E';
+            }
+        }
+    }
+    return result;
+}
+TwoOfFiveEncoding = ["00110", "10001", "01001", "11000", "00101", "10100", "01100", "00011", "10010", "01010"];
+Code128Encoding = {
+    "212222": {
+        A: " ",
+        B: " ",
+        C: "00"
+    },
+    "222122": {
+        A: "!",
+        B: "!",
+        C: "01"
+    },
+    "222221": {
+        A: '"',
+        B: '"',
+        C: "02"
+    },
+    "121223": {
+        A: "#",
+        B: "#",
+        C: "03"
+    },
+    "121322": {
+        A: "$",
+        B: "$",
+        C: "04"
+    },
+    "131222": {
+        A: "%",
+        B: "%",
+        C: "05"
+    },
+    "122213": {
+        A: "&",
+        B: "&",
+        C: "06"
+    },
+    "122312": {
+        A: "'",
+        B: "'",
+        C: "07"
+    },
+    "132212": {
+        A: "(",
+        B: "(",
+        C: "08"
+    },
+    "221213": {
+        A: ")",
+        B: ")",
+        C: "09"
+    },
+    "221312": {
+        A: "*",
+        B: "*",
+        C: "10"
+    },
+    "231212": {
+        A: "+",
+        B: "+",
+        C: "11"
+    },
+    "112232": {
+        A: ",",
+        B: ",",
+        C: "12"
+    },
+    "122132": {
+        A: "-",
+        B: "-",
+        C: "13"
+    },
+    "122231": {
+        A: ".",
+        B: ".",
+        C: "14"
+    },
+    "113222": {
+        A: "/",
+        B: "/",
+        C: "15"
+    },
+    "123122": {
+        A: "0",
+        B: "0",
+        C: "16"
+    },
+    "123221": {
+        A: "1",
+        B: "1",
+        C: "17"
+    },
+    "223211": {
+        A: "2",
+        B: "2",
+        C: "18"
+    },
+    "221132": {
+        A: "3",
+        B: "3",
+        C: "19"
+    },
+    "221231": {
+        A: "4",
+        B: "4",
+        C: "20"
+    },
+    "213212": {
+        A: "5",
+        B: "5",
+        C: "21"
+    },
+    "223112": {
+        A: "6",
+        B: "6",
+        C: "22"
+    },
+    "312131": {
+        A: "7",
+        B: "7",
+        C: "23"
+    },
+    "311222": {
+        A: "8",
+        B: "8",
+        C: "24"
+    },
+    "321122": {
+        A: "9",
+        B: "9",
+        C: "25"
+    },
+    "321221": {
+        A: ":",
+        B: ":",
+        C: "26"
+    },
+    "312212": {
+        A: ";",
+        B: ";",
+        C: "27"
+    },
+    "322112": {
+        A: "<",
+        B: "<",
+        C: "28"
+    },
+    "322211": {
+        A: "=",
+        B: "=",
+        C: "29"
+    },
+    "212123": {
+        A: ">",
+        B: ">",
+        C: "30"
+    },
+    "212321": {
+        A: "?",
+        B: "?",
+        C: "31"
+    },
+    "232121": {
+        A: "@",
+        B: "@",
+        C: "32"
+    },
+    "111323": {
+        A: "A",
+        B: "A",
+        C: "33"
+    },
+    "131123": {
+        A: "B",
+        B: "B",
+        C: "34"
+    },
+    "131321": {
+        A: "C",
+        B: "C",
+        C: "35"
+    },
+    "112313": {
+        A: "D",
+        B: "D",
+        C: "36"
+    },
+    "132113": {
+        A: "E",
+        B: "E",
+        C: "37"
+    },
+    "132311": {
+        A: "F",
+        B: "F",
+        C: "38"
+    },
+    "211313": {
+        A: "G",
+        B: "G",
+        C: "39"
+    },
+    "231113": {
+        A: "H",
+        B: "H",
+        C: "40"
+    },
+    "231311": {
+        A: "I",
+        B: "I",
+        C: "41"
+    },
+    "112133": {
+        A: "J",
+        B: "J",
+        C: "42"
+    },
+    "112331": {
+        A: "K",
+        B: "K",
+        C: "43"
+    },
+    "132131": {
+        A: "L",
+        B: "L",
+        C: "44"
+    },
+    "113123": {
+        A: "M",
+        B: "M",
+        C: "45"
+    },
+    "113321": {
+        A: "N",
+        B: "N",
+        C: "46"
+    },
+    "133121": {
+        A: "O",
+        B: "O",
+        C: "47"
+    },
+    "313121": {
+        A: "P",
+        B: "P",
+        C: "48"
+    },
+    "211331": {
+        A: "Q",
+        B: "Q",
+        C: "49"
+    },
+    "231131": {
+        A: "R",
+        B: "R",
+        C: "50"
+    },
+    "213113": {
+        A: "S",
+        B: "S",
+        C: "51"
+    },
+    "213311": {
+        A: "T",
+        B: "T",
+        C: "52"
+    },
+    "213131": {
+        A: "U",
+        B: "U",
+        C: "53"
+    },
+    "311123": {
+        A: "V",
+        B: "V",
+        C: "54"
+    },
+    "311321": {
+        A: "W",
+        B: "W",
+        C: "55"
+    },
+    "331121": {
+        A: "X",
+        B: "X",
+        C: "56"
+    },
+    "312113": {
+        A: "Y",
+        B: "Y",
+        C: "57"
+    },
+    "312311": {
+        A: "Z",
+        B: "Z",
+        C: "58"
+    },
+    "332111": {
+        A: "[",
+        B: "[",
+        C: "59"
+    },
+    "314111": {
+        A: "\\",
+        B: "\\",
+        C: "60"
+    },
+    "221411": {
+        A: "]",
+        B: "]",
+        C: "61"
+    },
+    "431111": {
+        A: "^",
+        B: "^",
+        C: "62"
+    },
+    "111224": {
+        A: "_",
+        B: "_",
+        C: "63"
+    },
+    "111422": {
+        A: "NUL",
+        B: "`",
+        C: "64"
+    },
+    "121124": {
+        A: "SOH",
+        B: "a",
+        C: "65"
+    },
+    "121421": {
+        A: "STX",
+        B: "b",
+        C: "66"
+    },
+    "141122": {
+        A: "ETX",
+        B: "c",
+        C: "67"
+    },
+    "141221": {
+        A: "EOT",
+        B: "d",
+        C: "68"
+    },
+    "112214": {
+        A: "ENQ",
+        B: "e",
+        C: "69"
+    },
+    "112412": {
+        A: "ACK",
+        B: "f",
+        C: "70"
+    },
+    "122114": {
+        A: "BEL",
+        B: "g",
+        C: "71"
+    },
+    "122411": {
+        A: "BS",
+        B: "h",
+        C: "72"
+    },
+    "142112": {
+        A: "HT",
+        B: "i",
+        C: "73"
+    },
+    "142211": {
+        A: "LF",
+        B: "j",
+        C: "74"
+    },
+    "241211": {
+        A: "VT",
+        B: "k",
+        C: "75"
+    },
+    "221114": {
+        A: "FF",
+        B: "l",
+        C: "76"
+    },
+    "413111": {
+        A: "CR",
+        B: "m",
+        C: "77"
+    },
+    "241112": {
+        A: "SO",
+        B: "n",
+        C: "78"
+    },
+    "134111": {
+        A: "SI",
+        B: "o",
+        C: "79"
+    },
+    "111242": {
+        A: "DLE",
+        B: "p",
+        C: "80"
+    },
+    "121142": {
+        A: "DC1",
+        B: "q",
+        C: "81"
+    },
+    "121241": {
+        A: "DC2",
+        B: "r",
+        C: "82"
+    },
+    "114212": {
+        A: "DC3",
+        B: "s",
+        C: "83"
+    },
+    "124112": {
+        A: "DC4",
+        B: "t",
+        C: "84"
+    },
+    "124211": {
+        A: "NAK",
+        B: "u",
+        C: "85"
+    },
+    "411212": {
+        A: "SYN",
+        B: "v",
+        C: "86"
+    },
+    "421112": {
+        A: "ETB",
+        B: "w",
+        C: "87"
+    },
+    "421211": {
+        A: "CAN",
+        B: "x",
+        C: "88"
+    },
+    "212141": {
+        A: "EM",
+        B: "y",
+        C: "89"
+    },
+    "214121": {
+        A: "SUB",
+        B: "z",
+        C: "90"
+    },
+    "412121": {
+        A: "ESC",
+        B: "{",
+        C: "91"
+    },
+    "111143": {
+        A: "FS",
+        B: "|",
+        C: "92"
+    },
+    "111341": {
+        A: "GS",
+        B: "}",
+        C: "93"
+    },
+    "131141": {
+        A: "RS",
+        B: "~",
+        C: "94"
+    },
+    "114113": {
+        A: "US",
+        B: "DEL",
+        C: "95"
+    },
+    "114311": {
+        A: "FNC3",
+        B: "FNC3",
+        C: "96"
+    },
+    "411113": {
+        A: "FNC2",
+        B: "FNC2",
+        C: "97"
+    },
+    "411311": {
+        A: "SHIFT_B",
+        B: "SHIFT_A",
+        C: "98"
+    },
+    "113141": {
+        A: "Code_C",
+        B: "Code_C",
+        C: "99"
+    },
+    "114131": {
+        A: "Code_B",
+        B: "FNC4",
+        C: "Code_B"
+    },
+    "311141": {
+        A: "FNC4",
+        B: "Code_A",
+        C: "Code_A"
+    },
+    "411131": {
+        A: "FNC1",
+        B: "FNC1",
+        C: "FNC1"
+    },
+    "211412": "A",
+    "211214": "B",
+    "211232": "C",
+    "233111": {
+        A: "STOP",
+        B: "STOP",
+        C: "STOP"
+    },
+    value: ["212222", "222122", "222221", "121223", "121322", "131222", "122213", "122312", "132212", "221213", "221312", "231212", "112232", "122132", "122231", "113222", "123122", "123221", "223211", "221132", "221231", "213212", "223112", "312131", "311222", "321122", "321221", "312212", "322112", "322211", "212123", "212321", "232121", "111323", "131123", "131321", "112313", "132113", "132311", "211313", "231113", "231311", "112133", "112331", "132131", "113123", "113321", "133121", "313121", "211331", "231131", "213113", "213311", "213131", "311123", "311321", "331121", "312113", "312311", "332111", "314111", "221411", "431111", "111224", "111422", "121124", "121421", "141122", "141221", "112214", "112412", "122114", "122411", "142112", "142211", "241211", "221114", "413111", "241112", "134111", "111242", "121142", "121241", "114212", "124112", "124211", "411212", "421112", "421211", "212141", "214121", "412121", "111143", "111341", "131141", "114113", "114311", "411113", "411311", "113141", "114131", "311141", "411131", "211412", "211214", "211232", "233111"]
+};
+Code93Encoding = {
+    "131112": {
+        value: 0,
+        character: "0"
+    },
+    "111213": {
+        value: 1,
+        character: "1"
+    },
+    "111312": {
+        value: 2,
+        character: "2"
+    },
+    "111411": {
+        value: 3,
+        character: "3"
+    },
+    "121113": {
+        value: 4,
+        character: "4"
+    },
+    "121212": {
+        value: 5,
+        character: "5"
+    },
+    "121311": {
+        value: 6,
+        character: "6"
+    },
+    "111114": {
+        value: 7,
+        character: "7"
+    },
+    "131211": {
+        value: 8,
+        character: "8"
+    },
+    "141111": {
+        value: 9,
+        character: "9"
+    },
+    "211113": {
+        value: 10,
+        character: "A"
+    },
+    "211212": {
+        value: 11,
+        character: "B"
+    },
+    "211311": {
+        value: 12,
+        character: "C"
+    },
+    "221112": {
+        value: 13,
+        character: "D"
+    },
+    "221211": {
+        value: 14,
+        character: "E"
+    },
+    "231111": {
+        value: 15,
+        character: "F"
+    },
+    "112113": {
+        value: 16,
+        character: "G"
+    },
+    "112212": {
+        value: 17,
+        character: "H"
+    },
+    "112311": {
+        value: 18,
+        character: "I"
+    },
+    "122112": {
+        value: 19,
+        character: "J"
+    },
+    "132111": {
+        value: 20,
+        character: "K"
+    },
+    "111123": {
+        value: 21,
+        character: "L"
+    },
+    "111222": {
+        value: 22,
+        character: "M"
+    },
+    "111321": {
+        value: 23,
+        character: "N"
+    },
+    "121122": {
+        value: 24,
+        character: "O"
+    },
+    "131121": {
+        value: 25,
+        character: "P"
+    },
+    "212112": {
+        value: 26,
+        character: "Q"
+    },
+    "212211": {
+        value: 27,
+        character: "R"
+    },
+    "211122": {
+        value: 28,
+        character: "S"
+    },
+    "211221": {
+        value: 29,
+        character: "T"
+    },
+    "221121": {
+        value: 30,
+        character: "U"
+    },
+    "222111": {
+        value: 31,
+        character: "V"
+    },
+    "112122": {
+        value: 32,
+        character: "W"
+    },
+    "112221": {
+        value: 33,
+        character: "X"
+    },
+    "122121": {
+        value: 34,
+        character: "Y"
+    },
+    "123111": {
+        value: 35,
+        character: "Z"
+    },
+    "121131": {
+        value: 36,
+        character: "-"
+    },
+    "311112": {
+        value: 37,
+        character: "."
+    },
+    "311211": {
+        value: 38,
+        character: " "
+    },
+    "321111": {
+        value: 39,
+        character: "$"
+    },
+    "112131": {
+        value: 40,
+        character: "/"
+    },
+    "113121": {
+        value: 41,
+        character: "+"
+    },
+    "211131": {
+        value: 42,
+        character: "%"
+    },
+    "121221": {
+        value: 43,
+        character: "($)"
+    },
+    "312111": {
+        value: 44,
+        character: "(%)"
+    },
+    "311121": {
+        value: 45,
+        character: "(/)"
+    },
+    "122211": {
+        value: 46,
+        character: "(+)"
+    },
+    "111141": {
+        value: -1,
+        character: "*"
+    }
+};
+Code39Encoding = {
+    "111221211": {
+        value: 0,
+        character: "0"
+    },
+    "211211112": {
+        value: 1,
+        character: "1"
+    },
+    "112211112": {
+        value: 2,
+        character: "2"
+    },
+    "212211111": {
+        value: 3,
+        character: "3"
+    },
+    "111221112": {
+        value: 4,
+        character: "4"
+    },
+    "211221111": {
+        value: 5,
+        character: "5"
+    },
+    "112221111": {
+        value: 6,
+        character: "6"
+    },
+    "111211212": {
+        value: 7,
+        character: "7"
+    },
+    "211211211": {
+        value: 8,
+        character: "8"
+    },
+    "112211211": {
+        value: 9,
+        character: "9"
+    },
+    "211112112": {
+        value: 10,
+        character: "A"
+    },
+    "112112112": {
+        value: 11,
+        character: "B"
+    },
+    "212112111": {
+        value: 12,
+        character: "C"
+    },
+    "111122112": {
+        value: 13,
+        character: "D"
+    },
+    "211122111": {
+        value: 14,
+        character: "E"
+    },
+    "112122111": {
+        value: 15,
+        character: "F"
+    },
+    "111112212": {
+        value: 16,
+        character: "G"
+    },
+    "211112211": {
+        value: 17,
+        character: "H"
+    },
+    "112112211": {
+        value: 18,
+        character: "I"
+    },
+    "111122211": {
+        value: 19,
+        character: "J"
+    },
+    "211111122": {
+        value: 20,
+        character: "K"
+    },
+    "112111122": {
+        value: 21,
+        character: "L"
+    },
+    "212111121": {
+        value: 22,
+        character: "M"
+    },
+    "111121122": {
+        value: 23,
+        character: "N"
+    },
+    "211121121": {
+        value: 24,
+        character: "O"
+    },
+    "112121121": {
+        value: 25,
+        character: "P"
+    },
+    "111111222": {
+        value: 26,
+        character: "Q"
+    },
+    "211111221": {
+        value: 27,
+        character: "R"
+    },
+    "112111221": {
+        value: 28,
+        character: "S"
+    },
+    "111121221": {
+        value: 29,
+        character: "T"
+    },
+    "221111112": {
+        value: 30,
+        character: "U"
+    },
+    "122111112": {
+        value: 31,
+        character: "V"
+    },
+    "222111111": {
+        value: 32,
+        character: "W"
+    },
+    "121121112": {
+        value: 33,
+        character: "X"
+    },
+    "221121111": {
+        value: 34,
+        character: "Y"
+    },
+    "122121111": {
+        value: 35,
+        character: "Z"
+    },
+    "121111212": {
+        value: 36,
+        character: "-"
+    },
+    "221111211": {
+        value: 37,
+        character: "."
+    },
+    "122111211": {
+        value: 38,
+        character: " "
+    },
+    "121212111": {
+        value: 39,
+        character: "$"
+    },
+    "121211121": {
+        value: 40,
+        character: "/"
+    },
+    "121112121": {
+        value: 41,
+        character: "+"
+    },
+    "111212121": {
+        value: 42,
+        character: "%"
+    },
+    "121121211": {
+        value: -1,
+        character: "*"
+    }
+};
+ExtendedEncoding = {
+    "/A": '!',
+    "/B": '"',
+    "/C": '#',
+    "/D": '$',
+    "/E": '%',
+    "/F": '&',
+    "/G": "'",
+    "/H": '(',
+    "/I": ')',
+    "/J": '*',
+    "/K": '+',
+    "/L": ',',
+    "/O": '/',
+    "/Z": ':',
+    "%F": ';',
+    "%G": '<',
+    "%H": '=',
+    "%I": '>',
+    "%J": '?',
+    "%K": '[',
+    "%L": "\\",
+    "%M": ']',
+    "%N": '^',
+    "%O": '_',
+    "+A": 'a',
+    "+B": 'b',
+    "+C": 'c',
+    "+D": 'd',
+    "+E": 'e',
+    "+F": 'f',
+    "+G": 'g',
+    "+H": 'h',
+    "+I": 'i',
+    "+J": 'j',
+    "+K": 'k',
+    "+L": 'l',
+    "+M": 'm',
+    "+N": 'n',
+    "+O": 'o',
+    "+P": 'p',
+    "+Q": 'q',
+    "+R": 'r',
+    "+S": 's',
+    "+T": 't',
+    "+U": 'u',
+    "+V": 'v',
+    "+W": 'w',
+    "+X": 'x',
+    "+Y": 'y',
+    "+Z": 'z',
+    "%P": "{",
+    "%Q": '|',
+    "%R": '|',
+    "%S": '~',
+};
+CodaBarEncoding = {
+    "0000011": "0",
+    "0000110": "1",
+    "0001001": "2",
+    "1100000": "3",
+    "0010010": "4",
+    "1000010": "5",
+    "0100001": "6",
+    "0100100": "7",
+    "0110000": "8",
+    "1001000": "9",
+    "0001100": "-",
+    "0011000": "$",
+    "1000101": ":",
+    "1010001": "/",
+    "1010100": ".",
+    "0011111": "+",
+    "0011010": "A",
+    "0001011": "B",
+    "0101001": "C",
+    "0001110": "D"
+};
+EAN13Encoding = {
+    "L": {
+        "3211": 0,
+        "2221": 1,
+        "2122": 2,
+        "1411": 3,
+        "1132": 4,
+        "1231": 5,
+        "1114": 6,
+        "1312": 7,
+        "1213": 8,
+        "3112": 9
+    },
+    "G": {
+        "1123": 0,
+        "1222": 1,
+        "2212": 2,
+        "1141": 3,
+        "2311": 4,
+        "1321": 5,
+        "4111": 6,
+        "2131": 7,
+        "3121": 8,
+        "2113": 9
+    },
+    "R": {
+        "3211": 0,
+        "2221": 1,
+        "2122": 2,
+        "1411": 3,
+        "1132": 4,
+        "1231": 5,
+        "1114": 6,
+        "1312": 7,
+        "1213": 8,
+        "3112": 9
+    },
+    formats: {
+        'GGGGGG': 0,
+        'GGLGLL': 1,
+        'GGLLGL': 2,
+        'GGLLLG': 3,
+        'GLGGLL': 4,
+        'GLLGGL': 5,
+        'GLLLGG': 6,
+        'GLGLGL': 7,
+        'GLGLLG': 8,
+        'GLLGLG': 9,
+        'LLLLLL': 0,
+        'LLGLGG': 1,
+        'LLGGLG': 2,
+        'LLGGGL': 3,
+        'LGLLGG': 4,
+        'LGGLLG': 5,
+        'LGGGLL': 6,
+        'LGLGLG': 7,
+        'LGLGGL': 8,
+        'LGGLGL': 9
+    }
+};
+self.onmessage = function(e) {
+    var width;
+    var i;
+    ScanImage = {
+        data: new Uint8ClampedArray(e.data.scan),
+        width: e.data.scanWidth,
+        height: e.data.scanHeight
+    };
+    switch (e.data.rotation) {
+        case 8:
+            ScanImage.data = Rotate(ScanImage.data, ScanImage.width, ScanImage.height, -90);
+            width = e.data.scanWidth;
+            ScanImage.width = ScanImage.height;
+            ScanImage.height = width;
+            break;
+        case 6:
+            ScanImage.data = Rotate(ScanImage.data, ScanImage.width, ScanImage.height, 90);
+            width = e.data.scanWidth;
+            ScanImage.width = ScanImage.height;
+            ScanImage.height = width;
+            break;
+        case 3:
+            ScanImage.data = Rotate(ScanImage.data, ScanImage.width, ScanImage.height, 180);
+    }
+    Image = {
+        data: Scale(ScanImage.data, ScanImage.width, ScanImage.height),
+        width: ScanImage.width / 2,
+        height: ScanImage.height / 2
+    };
+    if (e.data.postOrientation) {
+        postMessage({
+            result: Image,
+            success: "orientationData"
+        });
+    }
+    availableFormats = ["Code128", "Code93", "Code39", "EAN-13", "2Of5", "Inter2Of5", "Codabar"];
+    FormatPriority = [];
+    var decodeFormats = ["Code128", "Code93", "Code39", "EAN-13", "2Of5", "Inter2Of5", "Codabar"];
+    SecureCodabar = true;
+    Secure2Of5 = true;
+    Multiple = true;
+    if (typeof e.data.multiple !== 'undefined') {
+        Multiple = e.data.multiple;
+    }
+    if (typeof e.data.decodeFormats !== 'undefined') {
+        decodeFormats = e.data.decodeFormats;
+    }
+    for (i = 0; i < decodeFormats.length; i++) {
+        FormatPriority.push(decodeFormats[i]);
+    }
+    CreateTable();
+    CreateScanTable();
+    var FinalResult = Main();
+    if (FinalResult.length > 0) {
+        postMessage({
+            result: checkFinalResult(FinalResult),
+            success: true
+        });
+    } else {
+        postMessage({
+            result: FinalResult,
+            success: false
+        });
+    }
+};
+
+/*!
+ * HTML5 FileReaderHelper v.1.0.0
+ * Author: TĆ³th AndrĆ�s
+ * Licence: MIT
+ * url: http://atandrastoth.co.uk
+ */
+var FileReaderHelper = function() {
+    var init = function(types, readAs, callBack, multy) {
+        multy = typeof multy == 'undefined' ? false : multy;
+        var input = document.createElement('input');
+        input.style.cssText = 'display: none;';
+        input.type = "file";
+        if (multy) input.multiple = true;
+        document.querySelector('body').appendChild(input);
+        input.addEventListener('change', selectFiles, false);
+        input.click();
+
+        function selectFiles(evt) {
+            var files = (evt.target || evt.sourceElement).files;
+            removeElement(input);
+            for (var i = 0, f; f = files[i]; i++) {
+                if (!f.name.toLowerCase().match('(.)(.*(' + types.toLowerCase() + '))')) {
+                    continue;
+                }
+                var reader = new FileReader();
+                reader.onload = (function(theFile) {
+                    return function(e) {
+                        //config required data from e, theFile
+                        callBack({
+                            data: e.target.result,
+                            name: theFile.name,
+                            size: theFile.size
+                        });
+                    };
+                })(f);
+                switch (readAs) {
+                    case 'dataURL':
+                        reader.readAsDataURL(f);
+                        break;
+                    case 'binary':
+                        reader.readAsBinaryString(f);
+                        break;
+                    case 'array':
+                        reader.readAsArrayBuffer(f);
+                        break;
+                    default:
+                        reader.readAsText(f);
+                }
+            }
+        }
+    };
+
+    function removeElement(element) {
+        element && element.parentNode && element.parentNode.removeChild(element);
+    }
+    return {
+        Init: function(types, readAs, callBack, multy) {
+            init(types, readAs, callBack, multy);
+        }
+    }
+};
+
+/*!
+ * WebCodeCamJS 2.7.0 javascript Bar code and QR code decoder
+ * Author: TÃ³th AndrÃ¡s
+ * Web: http://atandrastoth.co.uk
+ * email: atandrastoth@gmail.com
+ * Licensed under the MIT license
+ */
+var WebCodeCamJS = function(element) {
+    'use strict';
+    this.Version = {
+        name: 'WebCodeCamJS',
+        version: '2.7.0',
+        author: 'TÃ³th AndrÃ¡s',
+    };
+    var mediaDevices = window.navigator.mediaDevices;
+    mediaDevices.getUserMedia = function(c) {
+        return new Promise(function(y, n) {
+            (window.navigator.getUserMedia || window.navigator.mozGetUserMedia || window.navigator.webkitGetUserMedia).call(navigator, c, y, n);
+        });
+    }
+    HTMLVideoElement.prototype.streamSrc = ('srcObject' in HTMLVideoElement.prototype) ? function(stream) {
+        this.srcObject = !!stream ? stream : null;
+    } : function(stream) {
+        if (!!stream) {
+            this.src = (window.URL || window.webkitURL).createObjectURL(stream);
+        } else {
+            this.removeAttribute('src');
+        }
+    };
+    var videoSelect, lastImageSrc, con, beepSound, w, h, lastCode;
+    var display = Q(element),
+        DecodeWorker = null,
+        video = html('<video muted autoplay></video>'),
+        sucessLocalDecode = false,
+        localImage = false,
+        flipMode = [1, 3, 6, 8],
+        isStreaming = false,
+        delayBool = false,
+        initialized = false,
+        localStream = null,
+        options = {
+            decodeQRCodeRate: 5,
+            decodeBarCodeRate: 3,
+            successTimeout: 500,
+            codeRepetition: true,
+            tryVertical: true,
+            frameRate: 15,
+            width: 320,
+            height: 240,
+            constraints: {
+                video: {
+                    mandatory: {
+                        maxWidth: 1280,
+                        maxHeight: 720
+                    },
+                    optional: [{
+                        sourceId: true
+                    }]
+                },
+                audio: false
+            },
+            flipVertical: false,
+            flipHorizontal: false,
+            zoom: 0,
+            beep: '',
+            decoderWorker: 'https://www.cc.puv.fi/~e1401168/ekasivu/barcode2/js/DecoderWorker.js',
+            brightness: 0,
+            autoBrightnessValue: 0,
+            grayScale: 0,
+            contrast: 0,
+            threshold: 0,
+            sharpness: [],
+            resultFunction: function(res) {
+                console.log(res.format + ": " + res.code);
+            },
+            cameraSuccess: function(stream) {
+                console.log('cameraSuccess');
+            },
+            canPlayFunction: function() {
+                console.log('canPlayFunction');
+            },
+            getDevicesError: function(error) {
+                console.log(error);
+            },
+            getUserMediaError: function(error) {
+                console.log(error);
+            },
+            cameraError: function(error) {
+                console.log(error);
+            }
+        };
+
+    function init() {
+        var constraints = changeConstraints();
+        try {
+            mediaDevices.getUserMedia(constraints).then(cameraSuccess).catch(function(error) {
+                options.cameraError(error);
+                return false;
+            });
+        } catch (error) {
+            options.getUserMediaError(error);
+            return false;
+        }
+        return true;
+    }
+
+    function play() {
+        if (!localImage) {
+            if (!localStream) {
+                init();
+            }
+            const p = video.play();
+            if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
+                p.catch(e => null);
+            }
+            delay();
+        }
+    }
+
+    function stop() {
+        delayBool = true;
+        const p = video.pause();
+        if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
+            p.catch(e => null);
+        }
+        video.streamSrc(null);
+        con.clearRect(0, 0, w, h);
+        if (localStream) {
+            for (var i = 0; i < localStream.getTracks().length; i++) {
+                localStream.getTracks()[i].stop();
+            }
+        }
+        localStream = null;
+    }
+
+    function pause() {
+        delayBool = true;
+        const p = video.pause();
+        if (p && (typeof Promise !== 'undefined') && (p instanceof Promise)) {
+            p.catch(e => null);
+        }
+    }
+
+    function delay() {
+        delayBool = true;
+        if (!localImage) {
+            setTimeout(function() {
+                delayBool = false;
+                if (options.decodeBarCodeRate) {
+                    tryParseBarCode();
+                }
+                if (options.decodeQRCodeRate) {
+                    tryParseQRCode();
+                }
+            }, options.successTimeout);
+        }
+    }
+
+    function beep() {
+    }
+
+    function cameraSuccess(stream) {
+        localStream = stream;
+        video.streamSrc(stream);
+        options.cameraSuccess(stream);
+    }
+
+    function cameraError(error) {
+        options.cameraError(error);
+    }
+
+    function setEventListeners() {
+        video.addEventListener('canplay', function(e) {
+            if (!isStreaming) {
+                if (video.videoWidth > 0) {
+                    h = video.videoHeight / (video.videoWidth / w);
+                }
+                display.setAttribute('width', w);
+                display.setAttribute('height', h);
+                isStreaming = true;
+                if (options.decodeQRCodeRate || options.decodeBarCodeRate) {
+                    delay();
+                }
+            }
+        }, false);
+        video.addEventListener('play', function() {
+            setInterval(function() {
+                if (!video.paused && !video.ended) {
+                    var z = options.zoom;
+                    if (z === 0) {
+                        z = optimalZoom();
+                    }
+                    con.drawImage(video, (w * z - w) / -2, (h * z - h) / -2, w * z, h * z);
+                    var imageData = con.getImageData(0, 0, w, h);
+                    if (options.grayScale) {
+                        imageData = grayScale(imageData);
+                    }
+                    if (options.brightness !== 0 || options.autoBrightnessValue) {
+                        imageData = brightness(imageData, options.brightness);
+                    }
+                    if (options.contrast !== 0) {
+                        imageData = contrast(imageData, options.contrast);
+                    }
+                    if (options.threshold !== 0) {
+                        imageData = threshold(imageData, options.threshold);
+                    }
+                    if (options.sharpness.length !== 0) {
+                        imageData = convolute(imageData, options.sharpness);
+                    }
+                    con.putImageData(imageData, 0, 0);
+                }
+            }, 1E3 / options.frameRate);
+        }, false);
+    }
+
+    function setCallBack() {
+        DecodeWorker.onmessage = function(e) {
+            if (localImage || (!delayBool && !video.paused)) {
+                if (e.data.success === true && e.data.success != 'localization') {
+                    sucessLocalDecode = true;
+                    delayBool = true;
+                    delay();
+                    setTimeout(function() {
+                        if (options.codeRepetition || lastCode != e.data.result[0].Value) {
+                            beep();
+                            lastCode = e.data.result[0].Value;
+                            options.resultFunction({
+                                format: e.data.result[0].Format,
+                                code: e.data.result[0].Value,
+                                imgData: lastImageSrc
+                            });
+                        }
+                    }, 0);
+                }
+                if ((!sucessLocalDecode || !localImage) && e.data.success != 'localization') {
+                    if (!localImage) {
+                        setTimeout(tryParseBarCode, 1E3 / options.decodeBarCodeRate);
+                    }
+                }
+            }
+        };
+        qrcode.callback = function(a) {
+            if (localImage || (!delayBool && !video.paused)) {
+                sucessLocalDecode = true;
+                delayBool = true;
+                delay();
+                setTimeout(function() {
+                    if (options.codeRepetition || lastCode != a) {
+                        beep();
+                        lastCode = a;
+                        options.resultFunction({
+                            format: 'QR Code',
+                            code: a,
+                            imgData: lastImageSrc
+                        });
+                    }
+                }, 0);
+            }
+        };
+    }
+
+    function tryParseBarCode() {
+        display.style.transform = 'scale(' + (options.flipHorizontal ? '-1' : '1') + ', ' + (options.flipVertical ? '-1' : '1') + ')';
+        if (options.tryVertical && !localImage) {
+            flipMode.push(flipMode[0]);
+            flipMode.splice(0, 1);
+        } else {
+            flipMode = [1, 3, 6, 8];
+        }
+        lastImageSrc = display.toDataURL();
+        DecodeWorker.postMessage({
+            scan: con.getImageData(0, 0, w, h).data,
+            scanWidth: w,
+            scanHeight: h,
+            multiple: false,
+            decodeFormats: ["Code128", "Code93", "Code39", "EAN-13", "2Of5", "Inter2Of5", "Codabar"],
+            rotation: flipMode[0]
+        });
+    }
+
+    function tryParseQRCode() {
+        display.style.transform = 'scale(' + (options.flipHorizontal ? '-1' : '1') + ', ' + (options.flipVertical ? '-1' : '1') + ')';
+        try {
+            lastImageSrc = display.toDataURL();
+            qrcode.decode();
+        } catch (e) {
+            if (!localImage && !delayBool) {
+                setTimeout(tryParseQRCode, 1E3 / options.decodeQRCodeRate);
+            }
+        }
+    }
+
+    function optimalZoom() {
+        return video.videoHeight / h;
+    }
+
+    function getImageLightness() {
+        var pixels = con.getImageData(0, 0, w, h),
+            d = pixels.data,
+            colorSum = 0,
+            r, g, b, avg;
+        for (var x = 0, len = d.length; x < len; x += 4) {
+            r = d[x];
+            g = d[x + 1];
+            b = d[x + 2];
+            avg = Math.floor((r + g + b) / 3);
+            colorSum += avg;
+        }
+        return Math.floor(colorSum / (w * h));
+    }
+
+    function brightness(pixels, adjustment) {
+        adjustment = adjustment === 0 && options.autoBrightnessValue ? Number(options.autoBrightnessValue) - getImageLightness() : adjustment;
+        var d = pixels.data;
+        for (var i = 0; i < d.length; i += 4) {
+            d[i] += adjustment;
+            d[i + 1] += adjustment;
+            d[i + 2] += adjustment;
+        }
+        return pixels;
+    }
+
+    function grayScale(pixels) {
+        var d = pixels.data;
+        for (var i = 0; i < d.length; i += 4) {
+            var r = d[i],
+                g = d[i + 1],
+                b = d[i + 2],
+                v = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            d[i] = d[i + 1] = d[i + 2] = v;
+        }
+        return pixels;
+    }
+
+    function contrast(pixels, cont) {
+        var data = pixels.data;
+        var factor = (259 * (cont + 255)) / (255 * (259 - cont));
+        for (var i = 0; i < data.length; i += 4) {
+            data[i] = factor * (data[i] - 128) + 128;
+            data[i + 1] = factor * (data[i + 1] - 128) + 128;
+            data[i + 2] = factor * (data[i + 2] - 128) + 128;
+        }
+        return pixels;
+    }
+
+    function threshold(pixels, thres) {
+        var average, d = pixels.data;
+        for (var i = 0, len = w * h * 4; i < len; i += 4) {
+            average = d[i] + d[i + 1] + d[i + 2];
+            if (average < thres) {
+                d[i] = d[i + 1] = d[i + 2] = 0;
+            } else {
+                d[i] = d[i + 1] = d[i + 2] = 255;
+            }
+            d[i + 3] = 255;
+        }
+        return pixels;
+    }
+
+    function convolute(pixels, weights, opaque) {
+        var sw = pixels.width,
+            sh = pixels.height,
+            w = sw,
+            h = sh,
+            side = Math.round(Math.sqrt(weights.length)),
+            halfSide = Math.floor(side / 2),
+            src = pixels.data,
+            tmpCanvas = document.createElement('canvas'),
+            tmpCtx = tmpCanvas.getContext('2d'),
+            output = tmpCtx.createImageData(w, h),
+            dst = output.data,
+            alphaFac = opaque ? 1 : 0;
+        for (var y = 0; y < h; y++) {
+            for (var x = 0; x < w; x++) {
+                var sy = y,
+                    sx = x,
+                    r = 0,
+                    g = 0,
+                    b = 0,
+                    a = 0,
+                    dstOff = (y * w + x) * 4;
+                for (var cy = 0; cy < side; cy++) {
+                    for (var cx = 0; cx < side; cx++) {
+                        var scy = sy + cy - halfSide,
+                            scx = sx + cx - halfSide;
+                        if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
+                            var srcOff = (scy * sw + scx) * 4,
+                                wt = weights[cy * side + cx];
+                            r += src[srcOff] * wt;
+                            g += src[srcOff + 1] * wt;
+                            b += src[srcOff + 2] * wt;
+                            a += src[srcOff + 3] * wt;
+                        }
+                    }
+                }
+                dst[dstOff] = r;
+                dst[dstOff + 1] = g;
+                dst[dstOff + 2] = b;
+                dst[dstOff + 3] = a + alphaFac * (255 - a);
+            }
+        }
+        return output;
+    }
+
+    function buildSelectMenu(selectorVideo, ind) {
+        videoSelect = Q(selectorVideo);
+        videoSelect.innerHTML = '';
+        try {
+            if (mediaDevices && mediaDevices.enumerateDevices) {
+                mediaDevices.enumerateDevices().then(function(devices) {
+                    devices.forEach(function(device) {
+                        gotSources(device);
+                    });
+                    if (typeof ind === 'string') {
+                        Array.prototype.find.call(videoSelect.children, function(a, i) {
+                            if (a['innerText' in HTMLElement.prototype ? 'innerText' : 'textContent'].toLowerCase().match(new RegExp(ind, 'g'))) {
+                                videoSelect.selectedIndex = i;
+                            }
+                        });
+                    } else {
+                        videoSelect.selectedIndex = videoSelect.children.length <= ind ? 0 : ind;
+                    }
+                }).catch(function(error) {
+                    options.getDevicesError(error);
+                });
+            } else if (mediaDevices && !mediaDevices.enumerateDevices) {
+                html('<option value="true">On</option>', videoSelect);
+                options.getDevicesError(new NotSupportError('enumerateDevices Or getSources is Not supported'));
+            } else {
+                throw new NotSupportError('getUserMedia is Not supported');
+            }
+        } catch (error) {
+            options.getDevicesError(error);
+        }
+    }
+
+    function gotSources(device) {
+        if (device.kind === 'video' || device.kind === 'videoinput') {
+            var face = (!device.facing || device.facing === '') ? 'unknown' : device.facing;
+            var text = device.label || 'camera ' + (videoSelect.length + 1) + ' (facing: ' + face + ')';
+            html('<option value="' + (device.id || device.deviceId) + '">' + text + '</option>', videoSelect);
+        }
+    }
+
+    function changeConstraints() {
+        var constraints = JSON.parse(JSON.stringify(options.constraints));
+        if (videoSelect && videoSelect.length !== 0) {
+            switch (videoSelect[videoSelect.selectedIndex].value.toString()) {
+                case 'true':
+                    if (navigator.userAgent.search("Edge") == -1 && navigator.userAgent.search("Chrome") != -1) {
+                        constraints.video.optional = [{
+                            sourceId: true
+                        }];
+                    } else {
+                        constraints.video.deviceId = undefined;
+                    }
+                    break;
+                case 'false':
+                    constraints.video = false;
+                    break;
+                default:
+                    if (navigator.userAgent.search("Edge") == -1 && navigator.userAgent.search("Chrome") != -1) {
+                        constraints.video.optional = [{
+                            sourceId: videoSelect[videoSelect.selectedIndex].value
+                        }];
+                    } else if (navigator.userAgent.search("Firefox") != -1) {
+                        constraints.video.deviceId = {
+                            exact: videoSelect[videoSelect.selectedIndex].value
+                        };
+                    } else {
+                         constraints.video.deviceId = videoSelect[videoSelect.selectedIndex].value;
+                    }
+                    break;
+            }
+        }
+        constraints.audio = false;
+        return constraints;
+    }
+
+    function Q(el) {
+        if (typeof el === 'string') {
+            var els = document.querySelectorAll(el);
+            return typeof els === 'undefined' ? undefined : els.length > 1 ? els : els[0];
+        }
+        return el;
+    }
+
+    function decodeLocalImage(url) {
+        stop();
+        localImage = true;
+        sucessLocalDecode = false;
+        var img = new Image();
+        img.onload = function() {
+            con.fillStyle = '#fff';
+            con.fillRect(0, 0, w, h);
+            con.drawImage(this, 5, 5, w - 10, h - 10);
+            tryParseQRCode();
+            tryParseBarCode();
+        };
+        if (url) {
+            download("temp", url);
+            decodeLocalImage();
+        } else {
+            if (FileReaderHelper) {
+                new FileReaderHelper().Init('jpg|png|jpeg|gif', 'dataURL', function(e) {
+                    img.src = e.data;
+                }, true);
+            } else {
+                alert("fileReader class not found!");
+            }
+        }
+    }
+
+    function download(filename, url) {
+        var a = window.document.createElement('a'),
+            bd = document.querySelector('body');
+        bd.appendChild(a);
+        a.setAttribute('href', url);
+        a.setAttribute('download', filename);
+        a.click();
+        bd.removeChild(a);
+    }
+
+    function mergeRecursive(target, source) {
+        if (typeof target !== 'object') {
+            target = {};
+        }
+        for (var property in source) {
+            if (source.hasOwnProperty(property)) {
+                var sourceProperty = source[property];
+                if (typeof sourceProperty === 'object') {
+                    target[property] = mergeRecursive(target[property], sourceProperty);
+                    continue;
+                }
+                target[property] = sourceProperty;
+            }
+        }
+        for (var a = 2, l = arguments.length; a < l; a++) {
+            mergeRecursive(target, arguments[a]);
+        }
+        return target;
+    }
+
+    function html(innerhtml, appendTo) {
+        var item = document.createElement('div');
+        if (innerhtml) {
+            item.innerHTML = innerhtml;
+        }
+        if (appendTo) {
+            appendTo.appendChild(item.children[0]);
+            return item;
+        }
+        return item.children[0];
+    }
+
+    function NotSupportError(message) {
+        this.name = 'NotSupportError';
+        this.message = (message || '');
+    }
+    NotSupportError.prototype = Error.prototype;
+    return {
+        init: function(opt) {
+            if (initialized) {
+                return this;
+            }
+            if (!display || display.tagName.toLowerCase() !== 'canvas') {
+                console.log('Element type must be canvas!');
+                alert('Element type must be canvas!');
+                return false;
+            }
+            con = display.getContext('2d');
+            if (opt) {
+                options = mergeRecursive(options, opt);
+                if (options.beep) {
+                }
+            }
+            display.width = w = options.width;
+            display.height = h = options.height;
+            qrcode.sourceCanvas = display;
+            initialized = true;
+            setEventListeners();
+            DecodeWorker = new Worker(options.decoderWorker);
+            if (options.decodeQRCodeRate || options.decodeBarCodeRate) {
+                setCallBack();
+            }
+            return this;
+        },
+        play: function() {
+            localImage = false;
+            setTimeout(play, 100);
+            return this;
+        },
+        stop: function() {
+            stop();
+            return this;
+        },
+        pause: function() {
+            pause();
+            return this;
+        },
+        buildSelectMenu: function(selector, ind) {
+            buildSelectMenu(selector, ind ? ind : 0);
+            return this;
+        },
+        getOptimalZoom: function() {
+            return optimalZoom();
+        },
+        getLastImageSrc: function() {
+            return display.toDataURL();
+        },
+        decodeLocalImage: function(url) {
+            decodeLocalImage(url);
+        },
+        isInitialized: function() {
+            return initialized;
+        },
+        getWorker: function () {
+            return DecodeWorker;
+        },
+        options: options
+    };
+};
+
+/*!
+ * WebCodeCamJS 2.1.0 javascript Bar code and QR code decoder
+ * Author: TÃ³th AndrÃ¡s
+ * Web: http://atandrastoth.co.uk
+ * email: atandrastoth@gmail.com
+ * Licensed under the MIT license
+ */
+
+(function(undefined) {
+    "use strict";
+ var packetID = Q("#packetID");
+
+    function Q(el) {
+        if (typeof el === "string") {
+            var els = document.querySelectorAll(el);
+            return typeof els === "undefined" ? undefined : els.length > 1 ? els : els[0];
+        }
+        return el;
+    }
+    var txt = "innerText" in HTMLElement.prototype ? "innerText" : "textContent";
+    var scannerLaser = Q(".scanner-laser"),
+        imageUrl = new Q("#image-url"),
+        play = Q("#play"),
+        scannedImg = Q("#scanned-img"),
+        scannedQR = Q("#scanned-QR"),
+        grabImg = Q("#grab-img"),
+        decodeLocal = Q("#decode-img"),
+        pause = Q("#pause"),
+        stop = Q("#stop"),
+        contrast = Q("#contrast"),
+        contrastValue = Q("#contrast-value"),
+        zoom = Q("#zoom"),
+        zoomValue = Q("#zoom-value"),
+        brightness = Q("#brightness"),
+        brightnessValue = Q("#brightness-value"),
+        threshold = Q("#threshold"),
+        thresholdValue = Q("#threshold-value"),
+        sharpness = Q("#sharpness"),
+        sharpnessValue = Q("#sharpness-value"),
+        grayscale = Q("#grayscale"),
+        grayscaleValue = Q("#grayscale-value"),
+        flipVertical = Q("#flipVertical"),
+        flipVerticalValue = Q("#flipVertical-value"),
+        flipHorizontal = Q("#flipHorizontal"),
+        flipHorizontalValue = Q("#flipHorizontal-value");
+    var args = {
+        autoBrightnessValue: 100,
+        resultFunction: function(res) {
+            [].forEach.call(scannerLaser, function(el) {
+                fadeOut(el, 0.5);
+                setTimeout(function() {
+                    fadeIn(el, 0.5);
+                }, 300);
+            });
+            scannedImg.src = res.imgData;
+			// tÃ¤Ã¤ oli alus scannedQR[txt]= jokaises missÃ¤ packedID.value ja tÃ¤mÃ¤ oli kÃ¤ytÃ¶ssÃ¤ :<p id="scanned-QR" ></p>
+            packetID.value = res.format + ": " + res.code;
+        },
+        getDevicesError: function(error) {
+            var p, message = "Error detected with the following parameters:\n";
+            for (p in error) {
+                message += p + ": " + error[p] + "\n";
+            }
+            alert(message);
+        },
+        getUserMediaError: function(error) {
+            var p, message = "Error detected with the following parameters:\n";
+            for (p in error) {
+                message += p + ": " + error[p] + "\n";
+            }
+            alert(message);
+        },
+        cameraError: function(error) {
+            var p, message = "Error detected with the following parameters:\n";
+            if (error.name == "NotSupportedError") {
+                var ans = confirm("Your browser does not support getUserMedia via HTTP!\n(see: https:goo.gl/Y0ZkNV).\n You want to see github demo page in a new window?");
+                if (ans) {
+                    window.open("https://andrastoth.github.io/webcodecamjs/");
+                }
+            } else {
+                for (p in error) {
+                    message += p + ": " + error[p] + "\n";
+                }
+                alert(message);
+            }
+        },
+        cameraSuccess: function() {
+            grabImg.classList.remove("disabled");
+        }
+    };
+    var decoder = new WebCodeCamJS("#webcodecam-canvas").buildSelectMenu("#camera-select", "environment|back").init(args);
+    decodeLocal.addEventListener("click", function() {
+        Page.decodeLocalImage();
+    }, false);
+    play.addEventListener("click", function() {
+        if (!decoder.isInitialized()) {
+            packetID.value = "Scanning ...";
+        } else {
+            packetID.value = "Scanning ...";
+            decoder.play();
+        }
+    }, false);
+    grabImg.addEventListener("click", function() {
+        if (!decoder.isInitialized()) {
+            return;
+        }
+        var src = decoder.getLastImageSrc();
+        scannedImg.setAttribute("src", src);
+    }, false);
+    pause.addEventListener("click", function(event) {
+        packetID.value = "Paused";
+        decoder.pause();
+    }, false);
+    stop.addEventListener("click", function(event) {
+        grabImg.classList.add("disabled");
+        packetID.value = "Stopped";
+        decoder.stop();
+    }, false);
+    Page.changeZoom = function(a) {
+        if (decoder.isInitialized()) {
+            var value = typeof a !== "undefined" ? parseFloat(a.toPrecision(2)) : zoom.value / 10;
+            zoomValue[txt] = zoomValue[txt].split(":")[0] + ": " + value.toString();
+            decoder.options.zoom = value;
+            if (typeof a != "undefined") {
+                zoom.value = a * 10;
+            }
+        }
+    };
+    Page.changeContrast = function() {
+        if (decoder.isInitialized()) {
+            var value = contrast.value;
+            contrastValue[txt] = contrastValue[txt].split(":")[0] + ": " + value.toString();
+            decoder.options.contrast = parseFloat(value);
+        }
+    };
+    Page.changeBrightness = function() {
+        if (decoder.isInitialized()) {
+            var value = brightness.value;
+            brightnessValue[txt] = brightnessValue[txt].split(":")[0] + ": " + value.toString();
+            decoder.options.brightness = parseFloat(value);
+        }
+    };
+    Page.changeThreshold = function() {
+        if (decoder.isInitialized()) {
+            var value = threshold.value;
+            thresholdValue[txt] = thresholdValue[txt].split(":")[0] + ": " + value.toString();
+            decoder.options.threshold = parseFloat(value);
+        }
+    };
+    Page.changeSharpness = function() {
+        if (decoder.isInitialized()) {
+            var value = sharpness.checked;
+            if (value) {
+                sharpnessValue[txt] = sharpnessValue[txt].split(":")[0] + ": on";
+                decoder.options.sharpness = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+            } else {
+                sharpnessValue[txt] = sharpnessValue[txt].split(":")[0] + ": off";
+                decoder.options.sharpness = [];
+            }
+        }
+    };
+    Page.changeVertical = function() {
+        if (decoder.isInitialized()) {
+            var value = flipVertical.checked;
+            if (value) {
+                flipVerticalValue[txt] = flipVerticalValue[txt].split(":")[0] + ": on";
+                decoder.options.flipVertical = value;
+            } else {
+                flipVerticalValue[txt] = flipVerticalValue[txt].split(":")[0] + ": off";
+                decoder.options.flipVertical = value;
+            }
+        }
+    };
+    Page.changeHorizontal = function() {
+        if (decoder.isInitialized()) {
+            var value = flipHorizontal.checked;
+            if (value) {
+                flipHorizontalValue[txt] = flipHorizontalValue[txt].split(":")[0] + ": on";
+                decoder.options.flipHorizontal = value;
+            } else {
+                flipHorizontalValue[txt] = flipHorizontalValue[txt].split(":")[0] + ": off";
+                decoder.options.flipHorizontal = value;
+            }
+        }
+    };
+    Page.changeGrayscale = function() {
+        if (decoder.isInitialized()) {
+            var value = grayscale.checked;
+            if (value) {
+                grayscaleValue[txt] = grayscaleValue[txt].split(":")[0] + ": on";
+                decoder.options.grayScale = true;
+            } else {
+                grayscaleValue[txt] = grayscaleValue[txt].split(":")[0] + ": off";
+                decoder.options.grayScale = false;
+            }
+        }
+    };
+    Page.decodeLocalImage = function() {
+        if (decoder.isInitialized()) {
+            decoder.decodeLocalImage(imageUrl.value);
+        }
+        imageUrl.value = null;
+    };
+    var getZomm = setInterval(function() {
+        var a;
+        try {
+            a = decoder.getOptimalZoom();
+        } catch (e) {
+            a = 0;
+        }
+        if (!!a && a !== 0) {
+            Page.changeZoom(a);
+            clearInterval(getZomm);
+        }
+    }, 500);
+
+    function fadeOut(el, v) {
+        el.style.opacity = 1;
+        (function fade() {
+            if ((el.style.opacity -= 0.1) < v) {
+                el.style.display = "none";
+                el.classList.add("is-hidden");
+            } else {
+                requestAnimationFrame(fade);
+            }
+        })();
+    }
+
+    function fadeIn(el, v, display) {
+        if (el.classList.contains("is-hidden")) {
+            el.classList.remove("is-hidden");
+        }
+        el.style.opacity = 0;
+        el.style.display = display || "block";
+        (function fade() {
+            var val = parseFloat(el.style.opacity);
+            if (!((val += 0.1) > v)) {
+                el.style.opacity = val;
+                requestAnimationFrame(fade);
+            }
+        })();
+    }
+    document.querySelector("#camera-select").addEventListener("change", function() {
+        if (decoder.isInitialized()) {
+            decoder.stop().play();
+        }
+    });
+}).call(window.Page = window.Page || {});
+
+
+
+
+(function(m){if(!(/iPhone|iPad|iPod/.test(navigator.platform)&&navigator.userAgent.indexOf("AppleWebKit")>-1)){return}var l=m.document;if(!l.querySelector){return}var n=l.querySelector("meta[name=viewport]"),a=n&&n.getAttribute("content"),k=a+",maximum-scale=1",d=a+",maximum-scale=10",g=true,j,i,h,c;if(!n){return}function f(){n.setAttribute("content",d);g=true}function b(){n.setAttribute("content",k);g=false}function e(o){c=o.accelerationIncludingGravity;j=Math.abs(c.x);i=Math.abs(c.y);h=Math.abs(c.z);if(!m.orientation&&(j>7||((h>6&&i<8||h<8&&i>6)&&j>5))){if(g){b()}}else{if(!g){f()}}}m.addEventListener("orientationchange",f,false);m.addEventListener("devicemotion",e,false)})(this);
+//setTimeout(function(){ document.querySelector("meta[name=viewport]").setAttribute('content','width=device-width, initial-scale=1');}, 500); if problem with device orientation use this.
+// window.onorientationchange = function(){window.location.reload();};
+  </script>
+
+
+</body>
+</html>

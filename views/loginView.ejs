@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Log In</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+  * {
+    box-sizing: border-box;
+    -webkit-box-sizing
+    -moz-box-sizing: border-box;
+
+  }
+  body{
+    margin:50px 0;
+    padding:0px;
+    text-align:center;
+
+  }
+  .form-group h2{
+    margin-top: 40px;
+    margin-right:18px;
+    font-size:60px;
+
+  }
+  .input{
+    width:260px;
+    height: 50px;
+    font-size:30px;
+
+  }
+  .form-group span h2{
+
+    margin-right:105px;
+
+  }
+  .input:focus {
+    outline: #4CAF50 solid 1px;
+  }
+  .btn{
+
+    font-size:25px;
+    margin-bottom:12px;
+    border-radius: 5px;
+    padding:13px 24px;
+
+
+  }
+  @media only screen and (orientation: landscape) {
+    body{
+      margin:50px 0;
+      padding:0px;
+      text-align:center;
+
+    }
+    .form-group h2{
+      margin-top: 40px;
+      font-size:65px;
+      display: inline;
+
+    }
+
+    .input{
+      width:45%;
+      height: 75px;
+      font-size:45px;
+
+    }
+    .form-group span h2{
+
+      margin-right:107px;
+
+    }
+    .input:focus {
+      outline: #4CAF50 solid 1px;
+    }
+    .btn{
+      font-size:40px;
+      border-radius: 5px;
+      padding:5px 22px;
+
+      margin-right:-261px;
+      margin-top: -11px;
+    }
+  }
+  </style>
+
+</head>
+<body>
+
+  <div class="container">
+    <form action="https://www.cc.puv.fi/action_page.php">
+      <div class="form-group ">
+        <h2>Operator</h2>
+
+        <input type="text" class="input" id="companyName" placeholder="" autofocus="">
+      </div>
+    </form>
+    <form action="https://www.cc.puv.fi/action_page.php">
+      <div class="form-group ">
+        <span> <h2>Name</h2> </span>
+
+        <input type="text" class="input" id="userName" placeholder="">
+      </div>
+      <a href="/add"><button type="button" onclick="saveCrap()" class="btn btn-primary">Go</button></a>
+
+    </form>
+  </div>
+  <script>
+  var autofillCompanyname=localStorage.getItem("companyName");
+  var autofillUsername=localStorage.getItem("userName");
+  if(autofillUsername!=null&&autofillCompanyname!=null)
+  {
+    document.getElementById("userName").value=autofillUsername;
+    document.getElementById("companyName").value=autofillCompanyname;
+  }
+  function doFirst()
+  {
+    var button = document.getElementById("button");
+    window.addEventListener("click", saveCrap, false);
+
+  }
+  function saveCrap()
+  {
+    var one = document.getElementById("userName").value;
+    var two = document.getElementById("companyName").value;
+    localStorage.setItem("companyName", two);
+    localStorage.setItem("userName", one);
+  }
+
+  //	localStorage.clear()
+
+  window.addEventListener("load", doFirst, false);
+</script>
+
+
+</body></html>

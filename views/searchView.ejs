@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Blockchain Logistics Tracker</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+  * {
+    box-sizing: border-box;
+    -webkit-box-sizing
+    -moz-box-sizing: border-box;
+
+  }
+  html{
+    width: 100%;
+  }
+  body{
+    width: 100%;
+    text-align:center;
+  }
+  .container{
+    width: 100%;
+    text-align:center;
+  }
+  .btn{
+    font-size:25px;
+    margin-bottom:12px;
+    border-radius: 5px;
+    padding:7px 12px;
+
+  }
+  .input{
+    width:75%;
+    height: 50px;
+    font-size:30px;
+
+  }
+  .input:focus {
+    outline: #4CAF50 solid 1px;
+  }
+  h2{
+    font-size:55px;
+
+  }
+  .viewing{
+    text-align: center;
+  }
+
+  .col
+  {
+    width:(100/7)%;
+  }
+
+  .nav>li>a:hover {
+    text-decoration: none;
+    background-color: #fff;
+    opacity: .5;
+  }
+
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-light menu" style="background-color: #e3f2fd;">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Blockchain Logistics Tracker</a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li><a href="/">Main menu</a></li>
+        <li><a href="/add">Add Packet</a></li>
+      </ul>
+    </div>
+  </nav>
+
+    <div class="container main-body">
+      <h2>Recent Track</h2>
+      <form action="/search" method="post" id="searchForm">
+        <div class="form-group">
+          <input name="searchTerm" list="predictive" type="search" class="input"  placeholder="" autofocus>
+          <datalist id="predictive"></datalist>
+          <button type="submit" class="btn btn-primary">Go</button>
+        </div>
+      </form>
+    </div>
+    <div id="id01" class="table-responsive"></div>
+
+  </div>
+  <script>
+  var suggestions="<%=suggestions%>";
+  suggestions=suggestions.split(';');
+  var retrievedPackets='<%-retrievedPackets%>';
+
+  for(var suggestIndex=0;suggestIndex<suggestions.length;suggestIndex+=1)
+  {
+    if(suggestions[suggestIndex]!=null&&suggestions[suggestIndex]!="")
+    {
+      document.getElementById("predictive").innerHTML+="<option value="+suggestions[suggestIndex]+">";
+    }
+  }
+
+  var jsonRetrievedPackets = JSON.parse(retrievedPackets);
+
+  if(retrievedPackets!=null)
+    myFunction(jsonRetrievedPackets);
+
+  function myFunction(jsonRetrievedPackets) {
+
+    var out = "<tr><th class='viewing'>Timestamp</th><th class='viewing'>Packet ID</th><th class='viewing'>Transaction</th><th class='viewing'>User Name</th><th class='viewing'>Company Name</th><th class='viewing'>Activity</th><th class='viewing'>Address</th></tr>";
+    //var links = [];
+    for(var entry in jsonRetrievedPackets.entries) {
+      out += "<td class='col'>" + jsonRetrievedPackets.entries[entry].timestamp +"</td>";
+      out += "<td class='col'>" + jsonRetrievedPackets.entries[entry].packetID +"</td>";
+      out += "<td class='col'>" + jsonRetrievedPackets.entries[entry].txHash +"</td>";
+      //out += "<td class='col'>" + <a id="transactionlink" target="_blank" href="">jsonRetrievedPackets.entries[entry].txHash</a> +"</td>";
+      //links[entry]="https://ropsten.etherscan.io/tx/"+jsonRetrievedPackets.entries[entry].txHash;
+      out += "<td class='col'>" + jsonRetrievedPackets.entries[entry].userName +"</td>";
+      out += "<td class='col'>" + jsonRetrievedPackets.entries[entry].companyName +"</td>";
+      out += "<td class='col'>" + jsonRetrievedPackets.entries[entry].activity +"</td>";
+      out += "<td class='col'>" + jsonRetrievedPackets.entries[entry].locationByGPS.formattedAddress +"</td></tr>";
+    }
+    /*
+    var transactionlinks = document.getElementsByClassName("transactionlink");
+    for(var link in transactionlinks)
+      transactionlinks[link].href=links[link];
+    */
+    document.getElementById("id01").innerHTML = "<table class='table'>"+out+"</table>";
+  }
+
+  </script>
+</body>
+</html>

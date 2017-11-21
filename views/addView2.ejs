@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Blockchain Logistics Tracker</title>
+  <meta charset="utf-8">
+  <!-- < meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <style>
+  * {
+    box-sizing: border-box;
+    -webkit-box-sizing
+    -moz-box-sizing: border-box;
+
+  }
+  body{
+    margin:50px 0;
+    padding:0px;
+    text-align:center;
+
+  }
+  .btn{
+    font-size:25px;
+    margin-bottom:12px;
+    border-radius: 5px;
+    padding:7px 5px;
+
+  }
+  .img {
+    float:right;
+  }
+  .input{
+    width:75%;
+    height: 50px;
+    font-size:30px;
+
+  }
+  .input:focus {
+    outline: #4CAF50 solid 1px;
+  }
+  h2{
+    margin-top: 40px;
+    margin-right:93px;
+    font-size:50px;
+  }
+  .glyphicon {
+    font-size: 40px;
+    float:right;
+  }
+  s
+  @media only screen and (orientation: landscape) {
+    .btn
+    {
+      font-size:40px;
+      margin-bottom:23px;
+      border-radius: 5px;
+      padding:8px 8px;
+    }
+    h2
+    {
+      margin-top: 40px;
+      font-size:65px;
+    }
+    body
+    {
+      margin:50px 0;
+      padding:0px;
+      text-align:center;
+    }
+    input
+    {
+      width:75%;
+      height: 75px;
+      font-size:45px;
+    }
+    .input:focus
+    {
+      outline: #4CAF50 solid 1px;
+    }
+    .koko
+    {
+      margin-top:-44px;
+    }
+    .glyphicon {
+      font-size: 40px;
+      float:right;
+    }
+
+  }
+  </style>
+
+</head>
+<body>
+  <div class="koko">
+    <nav class="navbar navbar-light menu" style="background-color: #e3f2fd;">
+      <a href="/"><span class="glyphicon glyphicon-home"></span></a>
+
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">Blockchain Logistics Tracker</a>
+        </div>
+      </div>
+      <h2>Packet ID</h2>
+      <form action="/add" method="post" id="addForm">
+        <div class="form-group ">
+          <label for="name"></label>
+          <input type="search" id="packetID" name="packetID"  list="predictive" class="input"   required autocomplete="packetID" placeholder="" autofocus>
+          <datalist id="predictive"></datalist>
+          <button type="button" class="btn btn-primary" onclick="getLocation()" >Submit</button>
+          <input  type="hidden" name="userName" id="user" value="">
+          <input name="companyName" type="hidden" id="company" value="">
+          <input name="latitudeClient"  id="lat" type="hidden">
+          <input name="longitudeClient"  id="lon" type="hidden">
+        </div>
+        <button type="submit" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" id="submitButton" disabled=true>Loading location...</button>
+      </form>
+      <h2 id="clientMessage" class="clientMessage"><%=messageToClient%></h2>
+    </div>
+
+    <script>
+    var suggestions="<%=suggestions%>";
+    suggestions=suggestions.split(';');
+
+    var submitButton = document.getElementById("submitButton");
+
+    var autofillCompanyname=localStorage.getItem("companyName");
+    var autofillUsername=localStorage.getItem("userName");
+    if(autofillUsername!=null&&autofillCompanyname!=null)
+    {
+      document.getElementById("user").value=autofillUsername;
+      document.getElementById("company").value=autofillCompanyname;
+    }
+
+    for(var suggestIndex=0;suggestIndex<suggestions.length;suggestIndex+=1)
+    {
+      if(suggestions[suggestIndex]!=null&&suggestions[suggestIndex]!="")
+      {
+        document.getElementById("predictive").innerHTML+="<option value="+suggestions[suggestIndex]+">";
+      }
+    }
+
+    function getLocation()
+    {
+      submitButton.style.color="blue";
+      if (navigator.geolocation && document.getElementById("packetID").value!="")
+      {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      }
+      else
+      {
+        //innerHTML = "Geolocation is not supported by this browser.";
+        alert("Location not supported or invalid Packet ID");
+        location.reload();
+      }
+    }
+
+    function showPosition(position) {
+      var showPositionLoop = setInterval(function()
+      {
+        if(position.coords.latitude.toFixed!=null && position.coords.longitude!=null)
+        {
+          document.getElementById("lat").value =position.coords.latitude;
+          document.getElementById("lon").value =position.coords.longitude;
+          clearInterval(showPositionLoop);
+          submitButton.disabled=false;
+          submitButton.click();
+        }
+      },100);
+    }
+
+    //script found online to fix iphone orientation problem
+
+    (function(m)
+    {
+      if(!(/iPhone|iPad|iPod/.test(navigator.platform)&&navigator.userAgent.indexOf("AppleWebKit")>-1))
+      {return}
+      var l=m.document;
+      if(!l.querySelector)
+      {return}
+      var n=l.querySelector("meta[name=viewport]"),
+      a=n&&n.getAttribute("content")
+      ,k=a+",maximum-scale=1",
+      d=a+",maximum-scale=10",
+      g=true,j,i,h,c;
+      if(!n)
+      {return}
+      function f()
+      {
+        n.setAttribute("content",d);g=true
+      }
+      function b()
+      {
+        n.setAttribute("content",k);
+        g=false
+      }
+      function e(o)
+      {
+        c=o.accelerationIncludingGravity;
+        j=Math.abs(c.x);i=Math.abs(c.y);h=Math.abs(c.z);
+        if(!m.orientation&&(j>7||((h>6&&i<8||h<8&&i>6)&&j>5)))
+        {
+          if(g)
+          {
+            b()
+          }
+        }
+        else
+        {
+          if(!g){f()}
+        }
+      }
+      m.addEventListener("orientationchange",f,false);m.addEventListener("devicemotion",e,false)}) (this);
+
+      </script>
+    </body>
+    </html>
