@@ -48,7 +48,7 @@ console.log('SSL webserver running in port '+port);
 //account
 //NEVER STORE THE PRIVATE KEY IN PUBLISHED SOURCE CODE!!!!
 var fromAccount = "0x15abD8B6b251Dac70B36C456BD880219080E153A";
-var privateKey = "";
+var privateKey = ""KEY HERE;
 var cryptoPassword = "logistiikka";
 //var txHash="";
 
@@ -72,7 +72,7 @@ app.get('/', function (req, res)
 
 app.get('/login', function (req, res)
 {
-  res.render('loginView2');
+  res.render('loginView');
 })
 
 //Less simple GETs with predictions and message reset
@@ -103,7 +103,7 @@ app.get('/add', function (req, res)
     {
       console.log("List of packets in database sent as predictive text input: "+listExisting);
       app.locals.suggestions=listExisting;
-      res.render('addView3');
+      res.render('addView');
       app.locals.messageToClient="";
       clearInterval(sendResponseLoop);
     }
@@ -137,7 +137,7 @@ app.get('/search', function (req, res)
     {
       console.log("List of packets in database sent as predictive text input: "+listExisting);
       app.locals.suggestions=listExisting;
-      res.render('searchView2');
+      res.render('searchView');
       app.locals.retrievedPackets="";
       clearInterval(sendResponseLoop);
     }

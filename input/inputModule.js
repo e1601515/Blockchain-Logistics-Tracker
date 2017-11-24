@@ -10,6 +10,11 @@ var sanitizeInput = function(input)
     input=input.replace("’","");
     input=input.replace('”','');
   }
+  while(input.includes(',')||input.includes(';'))
+  {
+    input=input.replace(",","");
+    input=input.replace(';','');
+  }
   if(debug)
     console.log("sanitized: "+input);
   return input;
