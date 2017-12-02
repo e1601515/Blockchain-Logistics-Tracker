@@ -18,7 +18,7 @@ function connectEthereum()
   else
   {
     console.log("Can't connect to local node. Trying remote node.")
-    web3.setProvider(new web3.providers.HttpProvider(""));
+    web3.setProvider(new web3.providers.HttpProvider("https://ropsten.infura.io/"));
     if(web3.isConnected())
     {
       console.log("Connected to remote node.")
@@ -127,8 +127,15 @@ var getTimestamp = function(tx,mode)
   }
 }
 
+var getNonce = function(searchTerm)
+{
+  var nonce = web3.eth.getTransactionCount(searchTerm);
+  return nonce;
+}
+
 exports.connectEthereum=connectEthereum;
 exports.saveTransaction=saveTransaction;
 exports.getFromEthereum=getFromEthereum;
 exports.getLatest=getLatest;
 exports.getTimestamp=getTimestamp;
+exports.getNonce = getNonce;

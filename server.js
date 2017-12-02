@@ -7,6 +7,7 @@ var NodeGeocoder = require('node-geocoder');
 var https = require('https');
 var fs = require('fs');
 var path = require("path");
+var qr = require('qrcode');
 
 //adding external .js file
 var ethereumModule = require('./ethereum/ethereumModule.js');
@@ -48,7 +49,7 @@ console.log('SSL webserver running in port '+port);
 //account
 //NEVER STORE THE PRIVATE KEY IN PUBLISHED SOURCE CODE!!!!
 var fromAccount = "0x15abD8B6b251Dac70B36C456BD880219080E153A";
-var privateKey = ""KEY HERE;
+var privateKey = "";
 var cryptoPassword = "logistiikka";
 //var txHash="";
 
@@ -74,6 +75,46 @@ app.get('/login', function (req, res)
 {
   res.render('loginView');
 })
+
+app.get('/gen', function (req, res)
+{
+  var programFactor = fromAccount.substring(fromAccount.length-24,fromAccount.length);
+  var runningNumber = ethereumModule.getNonce(fromAccount).toString();
+
+  //adding zeros to the start
+  while(runningNumber.length<8)
+  {
+    runningNumber = "0"+runningNumber;
+  }
+
+  var newID = programFactor + runningNumber;
+
+  //writing QR code
+  qr.toFile('./public/qr.png', newID, {
+    color: {
+      dark: '#000000',  // Black
+      light: '#0000' // Transparent
+    }
+  },
+  function (err)
+  {
+    if (err) throw err
+  });
+
+  res.send("Tracker factor: " + programFactor + " Nonce: " + runningNumber + " Generated Packet ID: " + newID);
+
+  app.locals.programFactor=programFactor;
+  app.locals.companyFactor=companyFactor;
+  app.locals.nonceFactor=runningNumber;
+  app.locals.newPacket=newID;
+  //res.render('genView');
+
+  if(debug)
+  {
+    console.log('QR code saved.');
+    console.log("Generated new packet ID " + newID);
+  }
+});
 
 //Less simple GETs with predictions and message reset
 app.get('/add', function (req, res)

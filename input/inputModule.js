@@ -2,7 +2,6 @@ var debug = true;
 //var sanitizedInput=null;
 var sanitizeInput = function(input)
 {
-  //var sanitizedInput;
   while(input.includes("'")||input.includes('"')||input.includes("’")||input.includes('”'))
   {
     input=input.replace("'","");
@@ -10,10 +9,11 @@ var sanitizeInput = function(input)
     input=input.replace("’","");
     input=input.replace('”','');
   }
-  while(input.includes(',')||input.includes(';'))
+  while(input.includes(',')||input.includes(';')||input.includes(':'))
   {
     input=input.replace(",","");
     input=input.replace(';','');
+    input=input.replace(':','');
   }
   if(debug)
     console.log("sanitized: "+input);
