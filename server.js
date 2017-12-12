@@ -90,7 +90,7 @@ app.get('/gen', function (req, res)
   var newID = programFactor + runningNumber;
 
   //writing QR code
-  qr.toFile('./public/qr.png', newID, {
+  qr.toFile('./public/qrcodee.png', newID, {
     color: {
       dark: '#000000',  // Black
       light: '#0000' // Transparent
@@ -101,13 +101,12 @@ app.get('/gen', function (req, res)
     if (err) throw err
   });
 
-  res.send("Tracker factor: " + programFactor + " Nonce: " + runningNumber + " Generated Packet ID: " + newID);
+  //res.send("Tracker factor: " + programFactor + " Nonce: " + runningNumber + " Generated Packet ID: " + newID);
 
   app.locals.programFactor=programFactor;
-  app.locals.companyFactor=companyFactor;
   app.locals.nonceFactor=runningNumber;
-  app.locals.newPacket=newID;
-  //res.render('genView');
+  app.locals.newID=newID;
+  setTimeout(function(){res.render('newIDView');},300);
 
   if(debug)
   {

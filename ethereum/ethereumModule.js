@@ -2,7 +2,6 @@ var debug = true;
 var Web3 = require('web3');
 //var util = require('ethereumjs-util');
 var tx = require('ethereumjs-tx');
-var lightwallet = require('eth-lightwallet');
 var databaseModule = require('../db/databaseModule.js');
 var txHash;
 var previousNonce=0;
@@ -51,7 +50,6 @@ var saveTransaction = function(privateKey,fromAccount,toAccount,encryptedDataToS
     gasPrice: web3.toHex(20000000000),
     data: web3.toHex(encryptedDataToSave)
   };
-  //var txutils = lightwallet.txutils;
   var transaction = new tx(rawTx);
   var hexPrivateKey = new Buffer(privateKey, 'hex');
   transaction.sign(hexPrivateKey);
